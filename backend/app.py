@@ -38,6 +38,34 @@ update_time_str = "未知"
 st.set_page_config(page_title="Copilot 额度监控", page_icon="🤖", layout="wide")
 st.title("🤖 GitHub Copilot 额度监控")
 
+# 修复移动端水平溢出与标题过大问题
+st.markdown("""
+<style>
+/* 防止页面出现横向滚动条 */
+[data-testid="stAppViewContainer"] {
+    overflow-x: hidden;
+}
+
+/* 移动端标题字体调小，避免撑破布局 */
+@media (max-width: 768px) {
+    h1 {
+        font-size: 1.5rem !important;
+        word-break: break-word;
+    }
+    .stMainBlockContainer {
+        padding: 1rem !important;
+    }
+}
+
+/* 确保所有图表和表格占满容器宽度，不溢出 */
+.stPlotlyChart, .stDataFrame, .stTable {
+    width: 100% !important;
+    max-width: 100vw;
+}
+</style>
+""", unsafe_allow_html=True)
+
+
 # 在获取数据之前
 col1, col_refresh , col_backfill= st.columns([6, 2, 2])
 with col_refresh:
