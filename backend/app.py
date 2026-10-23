@@ -4,7 +4,6 @@ import time
 import streamlit as st
 import pandas as pd
 import plotly.express as px
-# import streamlit_authenticator as stauth
 from logger_setup import setup_logger
 import database
 from api_client import USERNAME, fetch_daily_usage_backfill, get_copilot_data
@@ -25,14 +24,6 @@ logger = logging.getLogger(__name__)
 data_source = "live"  # 默认数据源为 "live"（实时数据） "offline"（离线缓存数据）
 error_message = ""
 update_time_str = "未知" 
-
-# authenticator = stauth.Authenticate(
-#     config['credentials'],
-#     config['cookie']['name'],
-#     config['cookie']['key'],
-#     config['cookie']['expiry_days']
-# )
-# authenticator.login()
 
 # 设置页面宽屏模式
 st.set_page_config(page_title="Copilot 额度监控", page_icon="🤖", layout="wide")
@@ -157,7 +148,7 @@ else:
     st.success(f"✅ **数据已实时更新** (更新时间: {update_time_str})")
 
 # 2. 顶部关键指标展示（使用列布局）
-col1, col2, col3 = st.columns(3)
+col1, col2 = st.columns(3)
 with col1:
     st.metric(
         label="当前订阅计划", 
@@ -165,13 +156,8 @@ with col1:
     )
 with col2:
     st.metric(
-        label="总额度 (Included Credits)", 
-        value=quota_info['included_credits']
-    )
-with col3:
-    st.metric(
-        label="剩余额度 (Remaining)", 
-        value=quota_info['remaining_credits']
+        label="剩余额度/总额度", 
+        value=f"{quota_info['remaining_credits']}/{quota_info['included_credits']}"
     )
 
 # 3. 进度条展示
@@ -190,9 +176,6 @@ else:
 st.info(f"距离额度重置还剩：**{quota_info['remaining_time_text']}** (重置日期: {quota_info['reset_time_text']})")
 
 st.divider()
-
-with st.expander("桌面小程序 JSON 数据"):
-    st.json(desktop_payload)
 
 # 4. 双表格展示：总额度历史 + 模型消耗历史
 st.subheader("📈 额度消耗趋势")
