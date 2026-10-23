@@ -25,27 +25,39 @@ data_source = "live"  # 默认数据源为 "live"（实时数据） "offline"（
 error_message = ""
 update_time_str = "未知" 
 
+# ================= 移动端适配 CSS =================
+# 修复了移动端顶部工具栏遮挡标题的问题
 # 设置页面宽屏模式
 st.set_page_config(page_title="Copilot 额度监控", page_icon="🤖", layout="wide")
-st.title("🤖 GitHub Copilot 额度监控")
 
 # 修复移动端水平溢出与标题过大问题
 st.markdown("""
 <style>
-/* 防止页面出现横向滚动条 */
+/* 全局防横向溢出 */
 [data-testid="stAppViewContainer"] {
     overflow-x: hidden;
 }
 
-/* 移动端标题字体调小，避免撑破布局 */
+/* 移动端适配 (屏幕宽度 < 768px) */
 @media (max-width: 768px) {
+    /* 1. 强行将主内容区往下推，留出顶部工具栏的空间 (关键修复) */
+    .stMainBlockContainer {
+        padding-top: 4.5rem !important; 
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
+        padding-bottom: 1rem !important;
+    }
+    
+    /* 2. 调整标题大小和边距 */
     h1 {
-        font-size: 1.5rem !important;
+        font-size: 1.4rem !important;
+        line-height: 1.3 !important;
+        margin-top: 0 !important; /* 去掉原本的顶部外边距，靠 padding 撑开 */
+        margin-bottom: 1rem !important;
         word-break: break-word;
     }
-    .stMainBlockContainer {
-        padding: 1rem !important;
-    }
+    h2 { font-size: 1.1rem !important; }
+    h3 { font-size: 1rem !important; }
 }
 
 /* 确保所有图表和表格占满容器宽度，不溢出 */
@@ -55,13 +67,15 @@ st.markdown("""
 }
 </style>
 """, unsafe_allow_html=True)
+st.title("🤖 GitHub Copilot 额度监控")
 
-
+# ================= 操作按钮区 =================
 # 在获取数据之前
 col1, col_refresh , col_backfill= st.columns([6, 2, 2])
 with col_refresh:
     force_refresh = st.button("🔄 刷新数据", use_container_width=True)
 
+# 回填历史数据按钮
 with col_backfill:
     do_backfill = st.button("📥 回填本月历史数据", use_container_width=True)
 
