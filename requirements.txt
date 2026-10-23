@@ -1,0 +1,6 @@
+# Runtime dependencies for the Streamlit dashboard and GitHub API client.
+pandas==3.0.6
+plotly==7.1.0
+python-dotenv==1.2.4
+requests==2.34.2
+streamlit==1.66.0
