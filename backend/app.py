@@ -148,7 +148,7 @@ else:
     st.success(f"✅ **数据已实时更新** (更新时间: {update_time_str})")
 
 # 2. 顶部关键指标展示（使用列布局）
-col1, col2 = st.columns(3)
+col1, col2 = st.columns(2)
 with col1:
     st.metric(
         label="当前订阅计划", 
