@@ -8,8 +8,7 @@ def verify_github_credentials(username: str, token: str) -> bool:
     通过 GitHub API 验证 Token 是否有效，并检查其归属是否与输入的用户名一致
     """
     if not username or not token:
-        st.warning("⚠️ 请输入用户名和 Token")
-        return False
+        return False,"请输入 GitHub 用户名和 Personal Access Token。"
         
     try:
         headers = {"Authorization": f"token {token.strip()}"}
@@ -18,10 +17,10 @@ def verify_github_credentials(username: str, token: str) -> bool:
         if resp.status_code == 200:
             actual_username = resp.json().get("login", "").lower()
             if actual_username == username.strip().lower():
-                return True
+                return True, "✅ 验证成功！"        
             else:
-                st.error(f"❌ 用户名不匹配！该 Token 实际属于 `{actual_username}`")
-                return False
+                
+                return False, f"❌ 用户名不匹配！该 Token 实际属于 `{actual_username}`"
         elif resp.status_code == 401:
             return False, "❌ 认证失败：Token 无效、已过期或被撤销。"
         elif resp.status_code == 403:
@@ -30,11 +29,9 @@ def verify_github_credentials(username: str, token: str) -> bool:
             return False, f"❌ GitHub API 返回未知状态码: {resp.status_code}"
         
     except requests.exceptions.Timeout:
-        st.error("⏳ 连接 GitHub 超时，请检查网络后重试。")
-        return False
+        return False, "⏳ 连接 GitHub 超时，请检查网络后重试。"
     except Exception as e:
-        st.error(f"❌ 发生网络异常: {e}")
-        return False
+        return False, f"❌ 验证过程中发生异常: {e}"
 
     
 def is_authenticated() -> bool:
