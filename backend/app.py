@@ -27,9 +27,14 @@ st.set_page_config(page_title="Copilot 额度监控", page_icon="🤖", layout="
 if not authenticate.is_authenticated():
     authenticate.render_login_page()
 
-# 获取当前用户信息
-current_user = st.session_state["username"]
-current_token = st.session_state["token"]
+# 获取当前用户信息 (使用安全的 get 方法)
+current_user = st.session_state.get("username")
+current_token = st.session_state.get("token")
+
+# 再次兜底检查，防止因为某些意外情况穿透
+if not current_user or not current_token:
+    st.session_state.clear()
+    st.rerun()
 
 # 侧边栏退出
 with st.sidebar:
@@ -142,7 +147,7 @@ with st.spinner("正在获取最新数据..."):
         # 如果有历史数据，则使用最近的一条记录
         record_date, included_credits, used_credits, remaining_credits = latest_total_usage[-1]
         update_time_str = f"历史缓存数据 (日期: {record_date})"
-        latest_models_date = database.get_latest_model_usage_date(record_date)
+        latest_models_date = database.get_latest_model_usage_date(record_date, current_user)
 
         # 伪造一个基本的 quota_info 字典，确保后续代码可以正常运行
         quota_info = {

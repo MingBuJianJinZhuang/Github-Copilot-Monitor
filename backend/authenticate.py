@@ -25,8 +25,12 @@ def verify_github_credentials(username: str, token: str) -> bool:
 
     
 def is_authenticated() -> bool:
-    """检查当前会话是否已认证"""
-    return st.session_state.get("authenticated", False)
+    """检查当前会话是否已认证，且必须包含完整的用户凭证"""
+    is_auth = st.session_state.get("authenticated", False)
+    has_user = "username" in st.session_state
+    has_token = "token" in st.session_state
+    # 必须三个条件同时满足才算有效登录
+    return is_auth and has_user and has_token
 
 def render_login_page():
     st.title("🔐 访问认证")
