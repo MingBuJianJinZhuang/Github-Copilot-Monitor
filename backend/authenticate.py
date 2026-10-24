@@ -23,14 +23,11 @@ def verify_github_credentials(username: str, token: str) -> bool:
                 st.error(f"❌ 用户名不匹配！该 Token 实际属于 `{actual_username}`")
                 return False
         elif resp.status_code == 401:
-            st.error("❌ 认证失败：Token 无效、已过期或被撤销。")
-            return False
+            return False, "❌ 认证失败：Token 无效、已过期或被撤销。"
         elif resp.status_code == 403:
-            st.error("❌ 权限不足：该 Token 缺少 `read:user` 权限，或触发了 API 速率限制。")
-            return False
+            return False, "❌ 权限不足：该 Token 缺少 `read:user` 权限，或触发了 API 速率限制。"
         else:
-            st.error(f"❌ GitHub API 返回未知状态码: {resp.status_code}")
-            return False
+            return False, f"❌ GitHub API 返回未知状态码: {resp.status_code}"
         
     except requests.exceptions.Timeout:
         st.error("⏳ 连接 GitHub 超时，请检查网络后重试。")
@@ -60,14 +57,15 @@ def render_login_page():
 
         if submitted:
             with st.spinner("正在验证凭证..."):
-                if verify_github_credentials(username, token):
+                is_valid, error_msg = verify_github_credentials(username, token)
+                if is_valid:
                     st.session_state["authenticated"] = True
                     st.session_state["username"] = username.strip().lower()
                     st.session_state["token"] = token.strip()
                     st.success("登录成功，正在跳转...")
                     st.rerun()
                 else:
-                    st.error("用户名或 Token 无效，或两者不匹配，请重试。")
+                    st.error(error_msg)
     st.stop()
 
 
