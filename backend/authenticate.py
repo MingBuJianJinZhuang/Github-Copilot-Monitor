@@ -13,20 +13,23 @@ def verify_github_credentials(username: str, token: str) -> bool:
         
     try:
         headers = {"Authorization": f"token {token.strip()}"}
-        resp = requests.get("https://api.github.com/user", headers=headers, timeout=10)
+        resp = requests.get("https://api.github.com/user", headers=headers, timeout=5)
         
         if resp.status_code == 200:
             actual_username = resp.json().get("login", "").lower()
             if actual_username == username.strip().lower():
                 return True
             else:
-                st.error(f"❌ 用户名不匹配！您输入的 Token 属于 `{actual_username}`，请修改用户名。")
+                st.error(f"❌ 用户名不匹配！该 Token 实际属于 `{actual_username}`")
                 return False
         elif resp.status_code == 401:
-            st.error("❌ 认证失败：Token 无效或已过期，请重新生成。")
+            st.error("❌ 认证失败：Token 无效、已过期或被撤销。")
+            return False
+        elif resp.status_code == 403:
+            st.error("❌ 权限不足：该 Token 缺少 `read:user` 权限，或触发了 API 速率限制。")
             return False
         else:
-            st.error(f"❌ GitHub API 返回异常状态码: {resp.status_code}")
+            st.error(f"❌ GitHub API 返回未知状态码: {resp.status_code}")
             return False
         
     except requests.exceptions.Timeout:
