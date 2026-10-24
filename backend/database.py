@@ -6,9 +6,16 @@ from datetime import date
 logger = logging.getLogger(__name__)
 
 # 数据库文件放在当前目录下
-DATABASE_PATH = Path(__file__).with_name("copilot_usage.db")
 
-def initialize_database():
+
+# 动态生成对应账号的数据库路径
+def get_db_file(username: str) -> Path:
+    # 过滤特殊字符防止路径穿越攻击
+    safe_name = "".join([c for c in username if c.isalnum() or c in "-_"])
+    return Path(__file__).with_name(f"copilot_usage_{safe_name}.db")
+
+def initialize_database(username: str):
+    DATABASE_PATH  = get_db_file(username)
     """初始化数据库，创建总额度表和模型消耗表"""
     logger.info("初始化数据库")
     try:
@@ -40,8 +47,9 @@ def initialize_database():
         logger.error(f"初始化数据库失败: {e}")
         raise
 
-def save_daily_usage(included_credits:float , used_credits:float , remaining_credits:float , model_usage:dict ):
+def save_daily_usage(included_credits:float , used_credits:float , remaining_credits:float , model_usage:dict , username: str):
     """保存每日总额度和模型消耗数据"""
+    DATABASE_PATH  = get_db_file(username)
     try:
         today_str = date.today().isoformat()
         with sqlite3.connect(DATABASE_PATH) as conn:
@@ -71,9 +79,10 @@ def save_daily_usage(included_credits:float , used_credits:float , remaining_cre
         logger.error(f"保存当日用量到数据库失败: {e}")
         raise
 
-def get_total_usage_history(years:int , months:int ):
+def get_total_usage_history(years:int , months:int , username: str):
     """获取总额度历史数据"""
     mouth_str = f"{years:04d}-{months:02d}"
+    DATABASE_PATH  = get_db_file(username)
     with sqlite3.connect(DATABASE_PATH) as conn:
         cursor = conn.cursor()
         cursor.execute("""
@@ -84,9 +93,10 @@ def get_total_usage_history(years:int , months:int ):
         """, (f"{mouth_str}%",))
         return cursor.fetchall()
 
-def get_model_usage_history(years:int , months:int ):
+def get_model_usage_history(years:int , months:int , username: str):
     """获取模型消耗历史数据"""
     mouth_str = f"{years:04d}-{months:02d}"
+    DATABASE_PATH  = get_db_file(username)
     with sqlite3.connect(DATABASE_PATH) as conn:
         cursor = conn.cursor()
         cursor.execute("""
@@ -97,8 +107,9 @@ def get_model_usage_history(years:int , months:int ):
         """, (f"{mouth_str}%",))
         return cursor.fetchall()
 
-def get_latest_total_usage():
+def get_latest_total_usage(username: str):
     """获取最新的总额度数据"""
+    DATABASE_PATH  = get_db_file(username)
     with sqlite3.connect(DATABASE_PATH) as conn:
         cursor = conn.cursor()
         # 按日期降序获取最新一条记录
@@ -109,8 +120,9 @@ def get_latest_total_usage():
         """)
         return cursor.fetchone()
 
-def get_latest_model_usage(target_date:str ):
+def get_latest_model_usage(username: str, target_date:str ):
     """获取指定日期的各模型消耗数据"""
+    DATABASE_PATH  = get_db_file(username)
     with sqlite3.connect(DATABASE_PATH) as conn:
         cursor = conn.cursor()
         cursor.execute("""
@@ -121,11 +133,12 @@ def get_latest_model_usage(target_date:str ):
         return cursor.fetchall()
 
 # 回填历史数据
-def backfill_history(daily_results: dict):
+def backfill_history(daily_results: dict, username: str):
     """
     将按日回填的结果写入数据库。
     daily_results 格式: { "2026-10-01": {"total": X, "models": {...}}, ... }
     """
+    DATABASE_PATH  = get_db_file(username)
     cumulative_total = 0.0
     cumulative_models = {}  # {model: cumulative_qty}
     

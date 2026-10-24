@@ -8,15 +8,14 @@ import plotly.express as px
 import authenticate
 from logger_setup import setup_logger
 import database
-from api_client import USERNAME, fetch_daily_usage_backfill, get_copilot_data
+from api_client import fetch_daily_usage_backfill, get_copilot_data
 from core_logic import (
     aggregate_model_usage,
     build_desktop_payload,
     calculate_quota_status,
 )
 
-# 初始化数据库
-database.initialize_database()
+
 
 # 设置全局日志
 setup_logger()
@@ -27,12 +26,19 @@ st.set_page_config(page_title="Copilot 额度监控", page_icon="🤖", layout="
 # ================= 访问认证门禁 =================
 if not authenticate.is_authenticated():
     authenticate.render_login_page()
-else:
-    # 在侧边栏显示当前用户和退出按钮
-    with st.sidebar:
-        st.write(f"👤 当前用户：**{st.session_state.get('username')}**")
-        if st.button("🚪 退出登录", use_container_width=True):
-            authenticate.logout()
+
+# 获取当前用户信息
+current_user = st.session_state["username"]
+current_token = st.session_state["token"]
+
+# 侧边栏退出
+with st.sidebar:
+    st.write(f"👤 当前用户：**{current_user}**")
+    if st.button("🚪 退出登录"):
+        authenticate.logout()
+
+# 初始化数据库
+database.initialize_database(current_user)
 
 # ================= 状态变量初始化 =================
 data_source = "live"  # 默认数据源为 "live"（实时数据） "offline"（离线缓存数据）
@@ -94,9 +100,9 @@ with col_backfill:
 if do_backfill:
     with st.spinner("正在回填历史数据，大约需要 30 秒..."):
         now = datetime.now()
-        backfill_data = fetch_daily_usage_backfill(USERNAME, now.year, now.month)
+        backfill_data = fetch_daily_usage_backfill(current_user, now.year, now.month, current_token)
         if backfill_data:
-            database.backfill_history(backfill_data)
+            database.backfill_history(backfill_data, current_user)
             st.success(f"✅ 成功回填 {len(backfill_data)} 天的历史数据！")
             time.sleep(1.5)
             st.rerun()
@@ -104,10 +110,10 @@ if do_backfill:
             st.warning("暂无数据或回填失败。")
 
 # ================= 数据获取 =================
-# 1. 获取数据；手动刷新时明确绕过 15 分钟缓存。
+# 获取数据；手动刷新时明确绕过 15 分钟缓存。
 with st.spinner("正在获取最新数据..."):
     try:
-        api_data, usage_data = get_copilot_data(force_refresh=force_refresh)
+        api_data, usage_data = get_copilot_data(force_refresh=force_refresh, username=current_user, token=current_token)
         quota_info = calculate_quota_status(api_data)
         models, total_gross = aggregate_model_usage(usage_data)
         desktop_payload = build_desktop_payload(quota_info, models, total_gross)
@@ -127,7 +133,7 @@ with st.spinner("正在获取最新数据..."):
         error_message = str(e)
 
         # 如果无法获取实时数据，则尝试从数据库中获取最近的历史数据
-        latest_total_usage = database.get_total_usage_history(datetime.now().year, datetime.now().month)
+        latest_total_usage = database.get_total_usage_history(datetime.now().year, datetime.now().month, current_user)
 
         if not latest_total_usage:
             st.error(f"网络请求失败，且本地无任何历史缓存数据可用。\n错误信息：{error_message}")
@@ -173,7 +179,7 @@ if data_source == "offline":
 else:
     st.success(f"✅ **数据已实时更新** (更新时间: {update_time_str})")
 
-# 2. 顶部关键指标展示（使用列布局）
+# 顶部关键指标展示（使用列布局）
 col1, col2 = st.columns(2)
 with col1:
     st.metric(
@@ -186,7 +192,7 @@ with col2:
         value=f"{quota_info['remaining_credits']}/{quota_info['included_credits']}"
     )
 
-# 3. 进度条展示
+# 进度条展示
 st.subheader("额度使用情况")
 used_credits = quota_info['included_credits'] - quota_info['remaining_credits']
 progress = used_credits / quota_info['included_credits'] if quota_info['included_credits'] > 0 else 0
@@ -203,7 +209,8 @@ st.info(f"距离额度重置还剩：**{quota_info['remaining_time_text']}** (�
 
 st.divider()
 
-# 4. 双表格展示：总额度历史 + 模型消耗历史
+# ================= 表格展示 =================
+# 双表格展示：总额度消耗趋势 & 各模型消耗趋势
 st.subheader("📈 额度消耗趋势")
 now = datetime.now()
 
@@ -212,7 +219,7 @@ col_total, col_model = st.columns(2)
 
 with col_total:
     st.subheader("整体已消耗额度趋势")
-    total_usage_history = database.get_total_usage_history(now.year, now.month)
+    total_usage_history = database.get_total_usage_history(now.year, now.month, current_user)
     if total_usage_history:
         df_total = pd.DataFrame(total_usage_history, columns=["日期", "已用额度(Total)"]).set_index("日期")
         st.line_chart(df_total, use_container_width=True)
@@ -221,7 +228,7 @@ with col_total:
 
 with col_model:
     st.subheader("各模型消耗趋势")
-    model_usage_history = database.get_model_usage_history(now.year, now.month)
+    model_usage_history = database.get_model_usage_history(now.year, now.month, current_user)
     if model_usage_history:
 
         df_model = pd.DataFrame(model_usage_history,columns=["日期", "模型名称", "已用额度(Model)"])
@@ -233,7 +240,7 @@ with col_model:
     else:
         st.write("暂无模型消耗历史数据。")
 
-# 5. 模型消耗明细展示
+# 模型消耗明细展示
 st.subheader("各模型 AI Credits 消耗汇总")
 
 if not models:
@@ -255,10 +262,10 @@ else:
     # 展示表格
     df = pd.DataFrame(table_data)
 
-    # 1. 使用 Pandas 将 DataFrame 转换为 HTML 字符串 (不要索引)
+    # 使用 Pandas 将 DataFrame 转换为 HTML 字符串 (不要索引)
     html_table = df.to_html(index=False, classes='custom-table', border=0)
 
-    # 2. 编写 CSS 样式，强制居中，并美化边框和表头
+    # 编写 CSS 样式，强制居中，并美化边框和表头
     css = """
     <style>
     .custom-table {
@@ -286,7 +293,7 @@ else:
     </style>
     """
 
-    # 3. 在 Streamlit 中渲染 CSS 和 HTML
+    # 在 Streamlit 中渲染 CSS 和 HTML
     st.markdown(css, unsafe_allow_html=True)
     st.markdown(html_table, unsafe_allow_html=True)
 

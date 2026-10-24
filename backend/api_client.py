@@ -13,30 +13,24 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
-TOKEN = st.secrets["GITHUB_TOKEN"]
-USERNAME = st.secrets["GITHUB_USERNAME"]
-
-if not TOKEN or not USERNAME:
-    raise RuntimeError(
-        "请先在 .env 中设置你的访问令牌 GITHUB_TOKEN 和你的用户名 GITHUB_USERNAME"
-    )
-
 # 获取当前模块的 logger
 logger = logging.getLogger(__name__)
 
-HEADERS = {
-    "Accept": "application/json",
-    "Authorization": f"Bearer {TOKEN}",
-    "X-GitHub-Api-Version": "2026-03-10",
-}
+# HEADERS = {
+#     "Accept": "application/json",
+#     "Authorization": f"Bearer {TOKEN}",
+#     "X-GitHub-Api-Version": "2026-03-10",
+# }
 
-API_CACHE_FILE = Path(__file__).with_name("copilot_usage_cache.json")
+# API_CACHE_FILE = Path(__file__).with_name(f"copilot_usage_cache_{USERNAME}.json")
 CACHE_TTL = timedelta(minutes=15)
 
+def get_cache_file(username: str) -> Path:
+    return Path(__file__).with_name(f"copilot_usage_cache_{username}.json")
+
 # 缓存数据结构：
-def load_cached_data():
-    if not API_CACHE_FILE.exists():
-        return None
+def load_cached_data(username: str):
+    API_CACHE_FILE = get_cache_file(username)
 
     try:
         cached = json.loads(API_CACHE_FILE.read_text(encoding="utf-8"))
@@ -49,13 +43,20 @@ def load_cached_data():
 
 
 # 获取 API 数据
-def fetch_api_data():
+def fetch_api_data(username: str, token: str):
     try:
+        API_CACHE_FILE = get_cache_file(username)
+
+        Headers = {
+            "Accept": "application/json",
+            "Authorization": f"Bearer {token.strip()}",
+            "X-GitHub-Api-Version": "2026-03-10",
+        }
         # `quota_snapshots` 是 Copilot UI 使用的数据源。
         logger.info("发起请求：GET https://api.github.com/copilot_internal/user")
         response = requests.get(
             "https://api.github.com/copilot_internal/user",
-            headers=HEADERS,
+            headers=Headers,
             timeout=30,
         )
         if not response.ok:
@@ -65,11 +66,11 @@ def fetch_api_data():
         data = response.json()
 
         # 账单接口提供按模型拆分的实际 AI Credits 消耗。
-        usage_url = f"https://api.github.com/users/{USERNAME}/settings/billing/ai_credit/usage"
+        usage_url = f"https://api.github.com/users/{username}/settings/billing/ai_credit/usage"
         logger.info(f"发起请求：GET {usage_url}")
         usage_response = requests.get(
             usage_url,
-            headers=HEADERS,
+            headers=Headers,
             params={"year": date.today().year, "month": date.today().month},
             timeout=30,
         )
@@ -101,19 +102,21 @@ def fetch_api_data():
         raise
 
 
-def get_copilot_data(force_refresh=False):
+
+def get_copilot_data(force_refresh=False,username:str="",token:str=""):
     """获取配额和明细数据，默认优先使用 15 分钟缓存。"""
     
-    cached_data = None if force_refresh else load_cached_data()
+    cached_data = None if force_refresh else load_cached_data(username)
     if cached_data is None:
         logger.info(f"数据刷新：正在从 GitHub 获取最新数据 (强制刷新={force_refresh})")
-        return fetch_api_data()
+        return fetch_api_data(username, token)
     else:
         logger.info("数据刷新：使用本地缓存数据")
         return cached_data
 
 
-def fetch_daily_usage_backfill(username: str, year: int, month: int):
+
+def fetch_daily_usage_backfill(username: str, year: int, month: int, token: str):
     """
     回填指定月份的历史数据。
     返回格式: { "2026-10-01": {"total": 5.2, "models": {"gpt-4o": 3.0, "claude-3.5": 2.2}}, ... }
@@ -121,7 +124,11 @@ def fetch_daily_usage_backfill(username: str, year: int, month: int):
     logger.info(f"开始回填历史数据：{year}年{month}月")
     today = date.today()
     daily_results = {}
-
+    Headers = {
+                "Accept": "application/json",
+                "Authorization": f"Bearer {token.strip()}",
+                "X-GitHub-Api-Version": "2026-03-10",
+            }
     # ================= 严谨的天数判断逻辑 =================
     # 1. 获取该月准确的天数 (例如 28, 29, 30, 31)
     _ , days_in_month = calendar.monthrange(year, month)
@@ -145,7 +152,7 @@ def fetch_daily_usage_backfill(username: str, year: int, month: int):
         url = f"https://api.github.com/users/{username}/settings/billing/ai_credit/usage"
         params = {"year": year, "month": month, "day": day}
         try:
-            response = requests.get(url, headers=HEADERS, params=params, timeout=30)
+            response = requests.get(url, headers=Headers, params=params, timeout=30)
             if not response.ok:
                 logger.error(f"请求失败: {response.status_code} - {response.text}")
                 continue
