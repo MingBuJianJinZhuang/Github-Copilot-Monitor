@@ -1,0 +1,21 @@
+# Python 虚拟环境
+.venv/
+venv/
+env/
+
+# VS Code 工作区配置
+.vscode/
+
+# Python 缓存文件
+__pycache__/
+*.pyc
+
+# 日志文件
+*.log
+
+# 数据库文件（视情况，通常本地数据库不上传）
+*.db
+*.sqlite3
+
+# 环境变量文件（包含敏感信息）
+.env
