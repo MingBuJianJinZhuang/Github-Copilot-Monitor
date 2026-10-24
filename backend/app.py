@@ -4,6 +4,8 @@ import time
 import streamlit as st
 import pandas as pd
 import plotly.express as px
+
+import authenticate
 from logger_setup import setup_logger
 import database
 from api_client import USERNAME, fetch_daily_usage_backfill, get_copilot_data
@@ -20,6 +22,18 @@ database.initialize_database()
 setup_logger()
 logger = logging.getLogger(__name__)
 
+# 设置页面宽屏模式
+st.set_page_config(page_title="Copilot 额度监控", page_icon="🤖", layout="wide")
+# ================= 访问认证门禁 =================
+if not authenticate.is_authenticated():
+    authenticate.render_login_page()
+else:
+    # 在侧边栏显示当前用户和退出按钮
+    with st.sidebar:
+        st.write(f"👤 当前用户：**{st.session_state.get('username')}**")
+        if st.button("🚪 退出登录", use_container_width=True):
+            authenticate.logout()
+
 # ================= 状态变量初始化 =================
 data_source = "live"  # 默认数据源为 "live"（实时数据） "offline"（离线缓存数据）
 error_message = ""
@@ -27,8 +41,6 @@ update_time_str = "未知"
 
 # ================= 移动端适配 CSS =================
 # 修复了移动端顶部工具栏遮挡标题的问题
-# 设置页面宽屏模式
-st.set_page_config(page_title="Copilot 额度监控", page_icon="🤖", layout="wide")
 
 # 修复移动端水平溢出与标题过大问题
 st.markdown("""
