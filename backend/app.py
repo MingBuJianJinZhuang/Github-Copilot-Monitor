@@ -26,6 +26,7 @@ st.set_page_config(page_title="Copilot 额度监控", page_icon="🤖", layout="
 # ================= 访问认证门禁 =================
 if not authenticate.is_authenticated():
     authenticate.render_login_page()
+    st.stop()  # 确保未登录时直接停止
 
 # 获取当前用户信息 (使用安全的 get 方法)
 current_user = st.session_state.get("username")
