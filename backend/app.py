@@ -130,6 +130,7 @@ with st.spinner("正在获取最新数据..."):
             used_credits=quota_info['included_credits'] - quota_info['remaining_credits'],
             remaining_credits=quota_info['remaining_credits'],
             model_usage=current_models_usage,
+            username=current_user,
         )
         update_time_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         logger.info("页面数据刷新流程全部成功完成。")
@@ -148,7 +149,7 @@ with st.spinner("正在获取最新数据..."):
         # 如果有历史数据，则使用最近的一条记录
         record_date, included_credits, used_credits, remaining_credits = latest_total_usage[-1]
         update_time_str = f"历史缓存数据 (日期: {record_date})"
-        latest_models_date = database.get_latest_model_usage_date(record_date, current_user)
+        latest_models_date = database.get_latest_model_usage_date(current_user, record_date)
 
         # 伪造一个基本的 quota_info 字典，确保后续代码可以正常运行
         quota_info = {
