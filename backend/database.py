@@ -5,14 +5,13 @@ from datetime import date
 
 logger = logging.getLogger(__name__)
 
-# 数据库文件放在当前目录下
-
 
 # 动态生成对应账号的数据库路径
 def get_db_file(username: str) -> Path:
     # 过滤特殊字符防止路径穿越攻击
     safe_name = "".join([c for c in username if c.isalnum() or c in "-_"])
     return Path(__file__).with_name(f"copilot_usage_{safe_name}.db")
+
 
 def initialize_database(username: str):
     DATABASE_PATH  = get_db_file(username)
@@ -47,6 +46,7 @@ def initialize_database(username: str):
         logger.error(f"初始化数据库失败: {e}")
         raise
 
+
 def save_daily_usage(included_credits:float , used_credits:float , remaining_credits:float , model_usage:dict , username: str):
     """保存每日总额度和模型消耗数据"""
     DATABASE_PATH  = get_db_file(username)
@@ -79,6 +79,7 @@ def save_daily_usage(included_credits:float , used_credits:float , remaining_cre
         logger.error(f"保存当日用量到数据库失败: {e}")
         raise
 
+
 def get_total_usage_history(years:int , months:int , username: str):
     """获取总额度历史数据"""
     mouth_str = f"{years:04d}-{months:02d}"
@@ -92,6 +93,7 @@ def get_total_usage_history(years:int , months:int , username: str):
             ORDER BY record_date ASC
         """, (f"{mouth_str}%",))
         return cursor.fetchall()
+
 
 def get_model_usage_history(years:int , months:int , username: str):
     """获取模型消耗历史数据"""
@@ -107,6 +109,7 @@ def get_model_usage_history(years:int , months:int , username: str):
         """, (f"{mouth_str}%",))
         return cursor.fetchall()
 
+
 def get_latest_total_usage(username: str):
     """获取最新的总额度数据"""
     DATABASE_PATH  = get_db_file(username)
@@ -120,6 +123,7 @@ def get_latest_total_usage(username: str):
         """)
         return cursor.fetchone()
 
+
 def get_latest_model_usage(username: str, target_date:str ):
     """获取指定日期的各模型消耗数据"""
     DATABASE_PATH  = get_db_file(username)
@@ -131,6 +135,7 @@ def get_latest_model_usage(username: str, target_date:str ):
             WHERE record_date = ?
         """, (target_date,))
         return cursor.fetchall()
+
 
 # 回填历史数据
 def backfill_history(daily_results: dict, username: str):

@@ -1,7 +1,10 @@
+import logging
 import streamlit as st
 import hmac
 import requests
 
+# 获取当前模块的 logger
+logger = logging.getLogger(__name__)
 
 def verify_github_credentials(username: str, token: str) -> bool:
     """
@@ -42,8 +45,9 @@ def is_authenticated() -> bool:
     # 必须三个条件同时满足才算有效登录
     return is_auth and has_user and has_token
 
+
 def render_login_page():
-    st.title("🔐 访问认证")
+    st.title("👤 Github Copilot 额度监控")
     st.markdown("请使用您的 **GitHub 用户名** 和 **Personal Access Token** 登录。")
     st.info("💡 您的 Token 仅保存在当前会话内存中，不会被记录到任何服务器日志中。")
 
@@ -60,13 +64,16 @@ def render_login_page():
                     st.session_state["username"] = username.strip().lower()
                     st.session_state["token"] = token.strip()
                     st.success("登录成功，正在跳转...")
+                    logger.info("用户登录成功")
                     st.rerun()
                 else:
                     st.error(error_msg)
+                    logger.error(f"用户登录失败: {error_msg}")
     st.stop()
 
 
 def logout():
     """登出并清除会话状态，包括 Token"""
     st.session_state.clear()
+    logger.info("用户已登出，清除会话状态")
     st.rerun()

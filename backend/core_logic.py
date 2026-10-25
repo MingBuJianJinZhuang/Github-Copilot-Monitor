@@ -1,5 +1,9 @@
 from collections import defaultdict
 from datetime import datetime, timezone
+import logging
+
+# 获取当前模块的 logger
+logger = logging.getLogger(__name__)
 
 def calculate_quota_status(api_data: dict):
     """解析配额快照，计算剩余时间等信息"""
@@ -31,6 +35,8 @@ def calculate_quota_status(api_data: dict):
             remaining_time_text = "已到期"
     else:
         remaining_time_text = "未知"
+
+    logger.info("配额信息解析完成")
 
     return {
         "plan": api_data.get('copilot_plan') or api_data.get('access_type_sku', '未知'),
@@ -91,7 +97,10 @@ def aggregate_model_usage(usage_data: dict):
             "net_percentage": net_percentage,
         }
 
+    logger.info("模型使用量聚合完成")
+
     return result_models , total_gross_quantity
+
 
 # 建立一个稳定的、可序列化为 JSON 的响应，用于桌面客户端
 def build_desktop_payload(quota_info: dict, models: dict, total_gross: float) -> dict:
@@ -100,6 +109,7 @@ def build_desktop_payload(quota_info: dict, models: dict, total_gross: float) ->
     remaining = quota_info["remaining_credits"]
     used = max(included - remaining, 0)
 
+    logger.info("桌面客户端响应数据构建完成")
     return {
         "schema_version": 1,
         "quota": {

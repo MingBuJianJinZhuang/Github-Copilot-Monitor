@@ -16,17 +16,12 @@ load_dotenv()
 # 获取当前模块的 logger
 logger = logging.getLogger(__name__)
 
-# HEADERS = {
-#     "Accept": "application/json",
-#     "Authorization": f"Bearer {TOKEN}",
-#     "X-GitHub-Api-Version": "2026-03-10",
-# }
-
 # API_CACHE_FILE = Path(__file__).with_name(f"copilot_usage_cache_{USERNAME}.json")
 CACHE_TTL = timedelta(minutes=15)
 
 def get_cache_file(username: str) -> Path:
     return Path(__file__).with_name(f"copilot_usage_cache_{username}.json")
+
 
 # 缓存数据结构：
 def load_cached_data(username: str):
@@ -102,18 +97,16 @@ def fetch_api_data(username: str, token: str):
         raise
 
 
-
 def get_copilot_data(force_refresh=False,username:str="",token:str=""):
     """获取配额和明细数据，默认优先使用 15 分钟缓存。"""
     
     cached_data = None if force_refresh else load_cached_data(username)
     if cached_data is None:
-        logger.info(f"数据刷新：正在从 GitHub 获取最新数据 (强制刷新={force_refresh})")
+        logger.info(f"数据刷新：正在从 GitHub 获取最新数据")
         return fetch_api_data(username, token)
     else:
-        logger.info("数据刷新：使用本地缓存数据")
+        logger.info("数据刷新：获取失败，使用本地缓存数据")
         return cached_data
-
 
 
 def fetch_daily_usage_backfill(username: str, year: int, month: int, token: str):
@@ -121,7 +114,6 @@ def fetch_daily_usage_backfill(username: str, year: int, month: int, token: str)
     回填指定月份的历史数据。
     返回格式: { "2026-10-01": {"total": 5.2, "models": {"gpt-4o": 3.0, "claude-3.5": 2.2}}, ... }
     """
-    logger.info(f"开始回填历史数据：{year}年{month}月")
     today = date.today()
     daily_results = {}
     Headers = {
@@ -145,7 +137,7 @@ def fetch_daily_usage_backfill(username: str, year: int, month: int, token: str)
         return {}
 
     # 如果今天是当月 1 号，last_day 会是 0，循环自然就不会执行，非常安全
-    print(f"准备回填 {year}-{month:02d} 的 1 到 {last_day} 号数据...")
+    logger.info(f"开始回填历史数据，回填范围：{year}-{month:02d}-01 到 {year}-{month:02d}-{last_day:02d}")
 
     for day in range(1, last_day + 1):
         # 构建请求 URL 和参数
@@ -179,6 +171,7 @@ def fetch_daily_usage_backfill(username: str, year: int, month: int, token: str)
         except Exception as e:
             logger.error(f"回填 {year}-{month:02d}-{day:02d} 数据时出错: {e}")
             continue
+    logger.info(f"历史数据回填完成，共回填 {len(daily_results)} 天的数据。")
 
     return daily_results
                     

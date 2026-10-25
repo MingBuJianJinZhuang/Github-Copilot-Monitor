@@ -15,8 +15,6 @@ from core_logic import (
     calculate_quota_status,
 )
 
-
-
 # 设置全局日志
 setup_logger()
 logger = logging.getLogger(__name__)
@@ -145,6 +143,7 @@ with st.spinner("正在获取最新数据..."):
         if not latest_total_usage:
             st.error(f"网络请求失败，且本地无任何历史缓存数据可用。\n错误信息：{error_message}")
             st.stop()
+        logger.info("最近的历史缓存数据已成功加载，页面将使用离线模式显示。")
 
         # 如果有历史数据，则使用最近的一条记录
         record_date, included_credits, used_credits, remaining_credits = latest_total_usage[-1]
