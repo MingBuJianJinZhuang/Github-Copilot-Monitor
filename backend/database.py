@@ -25,18 +25,29 @@ def _get_supabase_client() -> Client:
     if not hasattr(supabase_config, "get"):
         supabase_config = {}
 
-    supabase_url = get_secret("SUPABASE_URL") or supabase_config.get("url")
+    supabase_url = (
+        get_secret("SUPABASE_URL")
+        or get_secret("supabase_url")
+        or supabase_config.get("url")
+    )
     supabase_key = (
         get_secret("SUPABASE_KEY")
         or get_secret("SUPABASE_ANON_KEY")
+        or get_secret("supabase_key")
         or supabase_config.get("key")
         or supabase_config.get("anon_key")
     )
 
-    if not supabase_url or not supabase_key:
+    missing = []
+    if not supabase_url:
+        missing.append("SUPABASE_URL")
+    if not supabase_key:
+        missing.append("SUPABASE_KEY")
+    if missing:
         raise RuntimeError(
-            "Streamlit Secrets 中缺少 Supabase 配置。请配置顶层 "
-            "SUPABASE_URL 和 SUPABASE_KEY，或配置 [supabase] 下的 url 和 key。"
+            "Streamlit Secrets 中缺少 "
+            f"{'、'.join(missing)}。请配置顶层同名键，或配置 "
+            "[supabase] 下的 url 和 key。"
         )
 
     _supabase_client = create_client(supabase_url, supabase_key)
