@@ -31,7 +31,9 @@ def _get_supabase_client() -> Client:
         or supabase_config.get("url")
     )
     supabase_key = (
-        get_secret("SUPABASE_KEY")
+        get_secret("SUPABASE_SERVICE_ROLE_KEY")
+        or get_secret("SUPABASE_SERVICE_KEY")
+        or get_secret("SUPABASE_KEY")
         or get_secret("SUPABASE_ANON_KEY")
         or get_secret("supabase_key")
         or supabase_config.get("key")
@@ -46,8 +48,8 @@ def _get_supabase_client() -> Client:
     if missing:
         raise RuntimeError(
             "Streamlit Secrets 中缺少 "
-            f"{'、'.join(missing)}。请配置顶层同名键，或配置 "
-            "[supabase] 下的 url 和 key。"
+            f"{'、'.join(missing)}。请配置顶层同名键，或配置 [supabase] "
+            "下的 url 和 key。"
         )
 
     _supabase_client = create_client(supabase_url, supabase_key)
