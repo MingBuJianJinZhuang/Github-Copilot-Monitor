@@ -17,14 +17,18 @@ def _get_supabase_client() -> Client:
         return _supabase_client
 
     config = st.secrets
-    supabase_config = config.get("supabase", {})
+
+    def get_secret(name: str) -> Any:
+        return config[name] if name in config else None
+
+    supabase_config = get_secret("supabase")
     if not hasattr(supabase_config, "get"):
         supabase_config = {}
 
-    supabase_url = config.get("SUPABASE_URL") or supabase_config.get("url")
+    supabase_url = get_secret("SUPABASE_URL") or supabase_config.get("url")
     supabase_key = (
-        config.get("SUPABASE_KEY")
-        or config.get("SUPABASE_ANON_KEY")
+        get_secret("SUPABASE_KEY")
+        or get_secret("SUPABASE_ANON_KEY")
         or supabase_config.get("key")
         or supabase_config.get("anon_key")
     )
