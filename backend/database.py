@@ -16,16 +16,24 @@ def _get_supabase_client() -> Client:
     if _supabase_client is not None:
         return _supabase_client
 
-    try:
-        supabase_url = st.secrets["SUPABASE_URL"]
-        supabase_key = st.secrets["SUPABASE_KEY"]
-    except KeyError as error:
-        raise RuntimeError(
-            "Streamlit 配置中缺少 SUPABASE_URL 或 SUPABASE_KEY。"
-        ) from error
+    config = st.secrets
+    supabase_config = config.get("supabase", {})
+    if not hasattr(supabase_config, "get"):
+        supabase_config = {}
+
+    supabase_url = config.get("SUPABASE_URL") or supabase_config.get("url")
+    supabase_key = (
+        config.get("SUPABASE_KEY")
+        or config.get("SUPABASE_ANON_KEY")
+        or supabase_config.get("key")
+        or supabase_config.get("anon_key")
+    )
 
     if not supabase_url or not supabase_key:
-        raise RuntimeError("SUPABASE_URL 和 SUPABASE_KEY 不能为空。")
+        raise RuntimeError(
+            "Streamlit Secrets 中缺少 Supabase 配置。请配置顶层 "
+            "SUPABASE_URL 和 SUPABASE_KEY，或配置 [supabase] 下的 url 和 key。"
+        )
 
     _supabase_client = create_client(supabase_url, supabase_key)
     return _supabase_client
