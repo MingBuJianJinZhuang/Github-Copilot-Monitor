@@ -33,6 +33,8 @@ def _get_supabase_client() -> Client:
     supabase_key = (
         get_secret("SUPABASE_SERVICE_ROLE_KEY")
         or get_secret("SUPABASE_SERVICE_KEY")
+        or supabase_config.get("service_role_key")
+        or supabase_config.get("service_key")
         or get_secret("SUPABASE_KEY")
         or get_secret("SUPABASE_ANON_KEY")
         or get_secret("supabase_key")
@@ -53,6 +55,10 @@ def _get_supabase_client() -> Client:
         )
 
     _supabase_client = create_client(supabase_url, supabase_key)
+    logger.info(
+        "Supabase 客户端初始化完成；请确认使用的是 service_role/secret key，"
+        "否则启用 RLS 后无法写入数据。"
+    )
     return _supabase_client
 
 
