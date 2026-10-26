@@ -138,7 +138,7 @@ with st.spinner("正在获取最新数据..."):
         error_message = str(e)
 
         # 如果无法获取实时数据，则尝试从数据库中获取最近的历史数据
-        latest_total_usage = database.get_total_usage_history(datetime.now().year, datetime.now().month, current_user)
+        latest_total_usage = database.get_latest_total_usage(current_user)
 
         if not latest_total_usage:
             st.error(f"网络请求失败，且本地无任何历史缓存数据可用。\n错误信息：{error_message}")
@@ -146,9 +146,9 @@ with st.spinner("正在获取最新数据..."):
         logger.info("最近的历史缓存数据已成功加载，页面将使用离线模式显示。")
 
         # 如果有历史数据，则使用最近的一条记录
-        record_date, included_credits, used_credits, remaining_credits = latest_total_usage[-1]
+        record_date, included_credits, used_credits, remaining_credits = latest_total_usage
         update_time_str = f"历史缓存数据 (日期: {record_date})"
-        latest_models_date = database.get_latest_model_usage_date(current_user, record_date)
+        latest_models_date = database.get_latest_model_usage(current_user, record_date)
 
         # 伪造一个基本的 quota_info 字典，确保后续代码可以正常运行
         quota_info = {
