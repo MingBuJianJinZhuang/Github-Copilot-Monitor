@@ -18,13 +18,15 @@ logger = logging.getLogger(__name__)
 
 # API_CACHE_FILE = Path(__file__).with_name(f"copilot_usage_cache_{USERNAME}.json")
 CACHE_TTL = timedelta(minutes=15)
+"""缓存时间间隔，15分钟"""
 
 def get_cache_file(username: str) -> Path:
+    """返回缓存文件路径，按用户名区分"""
     return Path(__file__).with_name(f"copilot_usage_cache_{username}.json")
 
 
-# 缓存数据结构：
 def load_cached_data(username: str):
+    """从缓存文件中加载数据"""
     API_CACHE_FILE = get_cache_file(username)
 
     try:
@@ -37,8 +39,8 @@ def load_cached_data(username: str):
         return None
 
 
-# 获取 API 数据
 def fetch_api_data(username: str, token: str):
+    """获取 API 数据并缓存"""
     try:
         API_CACHE_FILE = get_cache_file(username)
 

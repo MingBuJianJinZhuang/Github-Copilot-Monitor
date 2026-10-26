@@ -50,6 +50,7 @@ def calculate_quota_status(api_data: dict):
 
 
 def aggregate_model_usage(usage_data: dict):
+    """聚合模型使用量，计算每个模型的总使用量和占比"""
     models = defaultdict(
     lambda: {
         "gross_quantity": 0.0,
@@ -102,9 +103,8 @@ def aggregate_model_usage(usage_data: dict):
     return result_models , total_gross_quantity
 
 
-# 建立一个稳定的、可序列化为 JSON 的响应，用于桌面客户端
 def build_desktop_payload(quota_info: dict, models: dict, total_gross: float) -> dict:
-    """Build a stable, JSON-serializable response for a desktop client."""
+    """建立一个稳定的、可序列化为 JSON 的响应，用于桌面客户端"""
     included = quota_info["included_credits"]
     remaining = quota_info["remaining_credits"]
     used = max(included - remaining, 0)

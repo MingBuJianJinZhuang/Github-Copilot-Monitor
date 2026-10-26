@@ -47,6 +47,7 @@ def is_authenticated() -> bool:
 
 
 def render_login_page():
+    """渲染登录页面，要求用户输入 GitHub 用户名和 Personal Access Token"""
     st.title("👤 Github Copilot 额度监控")
     st.markdown("请使用您的 **GitHub 用户名** 和 **Personal Access Token** 登录。")
     st.info("💡 您的 Token 仅保存在当前会话内存中，不会被记录到任何服务器日志中。")
