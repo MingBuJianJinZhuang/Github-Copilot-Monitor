@@ -253,12 +253,33 @@ st.info(f"距离额度重置还剩：**{quota_info['remaining_time_text']}** (�
 st.divider()
 
 # ================= 图表与明细展示 =================
-st.subheader("📈 额度消耗趋势")
+# st.subheader("📈 额度消耗趋势")
 now = datetime.now()
 
-# 使用 Tabs 折叠杂乱的图表 (新增：让界面更干净)
-tab1, tab2 = st.tabs(["📈 消耗趋势图", "📊 各模型明细"])
+# 预处理表格和饼图的数据（提取到 tabs 外面，避免重复计算）
+if not models:
+    st.write("当前月份暂无消耗记录。")
+else:
+    table_data = []
+    for model_name, stats in models.items():
+        table_data.append({
+            "模型名称": model_name,
+            "消耗数量 (Gross)": round(stats["gross_quantity"], 2),
+            "消耗占比": f"{stats['percentage']:.2f}%",
+            "产生费用 ($)": round(stats["gross_amount"], 4)
+        })
+    table_data = sorted(table_data, key=lambda x: x["消耗数量 (Gross)"], reverse=True)
+    df = pd.DataFrame(table_data)
 
+    pie_chart_data = pd.DataFrame({
+        "模型名称": [item["模型名称"] for item in table_data],
+        "消耗占比": [float(item["消耗占比"].strip('%')) for item in table_data]
+    })
+
+# 使用 Tabs 折叠杂乱的图表 (新增：让界面更干净)
+tab1, tab2, tab3 = st.tabs(["📈 消耗趋势图", "📊 模型明细表", "🍩 消耗占比图"])
+
+# --- Tab 1: 趋势图 ---
 with tab1:
     col_total, col_model = st.columns(2)
     
@@ -268,7 +289,7 @@ with tab1:
         if total_usage_history:
             df_total = pd.DataFrame(total_usage_history, columns=["日期", "已用额度(Total)"])
             
-            # 美化：改用 Plotly 平滑面积图
+            # 使用 Plotly 平滑面积图
             fig_total = go.Figure()
             fig_total.add_trace(go.Scatter(
                 x=df_total["日期"], y=df_total["已用额度(Total)"],
@@ -297,23 +318,12 @@ with tab1:
         else:
             st.write("暂无模型消耗历史数据。")
 
+# --- Tab 2: 表格与柱状图 ---
 with tab2:
     if not models:
-        st.write("当前月份暂无消耗记录。")
+        pass # 上面已经处理了为空的情况
     else:
-        # 转换表格数据
-        table_data = []
-        for model_name, stats in models.items():
-            table_data.append({
-                "模型名称": model_name,
-                "消耗数量 (Gross)": round(stats["gross_quantity"], 2),
-                "消耗占比": f"{stats['percentage']:.2f}%",
-                "产生费用 ($)": round(stats["gross_amount"], 4)
-            })
-        table_data = sorted(table_data, key=lambda x: x["消耗数量 (Gross)"], reverse=True)
-        df = pd.DataFrame(table_data)
-
-        # 1. 绘制横向柱状图 (美化：解决文字竖排问题)
+        # 绘制横向柱状图
         df_chart = df.sort_values(by="消耗数量 (Gross)", ascending=True)
         fig_bar = px.bar(
             df_chart, x="消耗数量 (Gross)", y="模型名称", orientation='h',
@@ -327,7 +337,7 @@ with tab2:
         fig_bar.update_traces(texttemplate='%{text:.2f}', textposition='outside')
         st.plotly_chart(fig_bar, use_container_width=True)
 
-        # 2. 绘制表格
+        # 渲染表格
         html_table = df.to_html(index=False, classes='custom-table', border=0)
         css = """
         <style>
@@ -340,21 +350,24 @@ with tab2:
         st.markdown(css, unsafe_allow_html=True)
         st.markdown(html_table, unsafe_allow_html=True)
 
-        # 3. 绘制环形图 (美化：调整尺寸和图例位置)
-        st.markdown("**各模型 AI Credits 消耗占比**")
-        pie_chart_data = pd.DataFrame({
-            "模型名称": [item["模型名称"] for item in table_data],
-            "消耗占比": [float(item["消耗占比"].strip('%')) for item in table_data]
-        })
-        fig_pie = px.pie(
-            pie_chart_data, values='消耗占比', names='模型名称', hole=0.6,
-            color_discrete_sequence=px.colors.qualitative.Pastel
-        )
-        fig_pie.update_traces(textinfo='percent', textposition='inside', hoverinfo='label+value')
-        fig_pie.update_layout(
-            margin=dict(t=20, b=20, l=20, r=20), height=320, showlegend=True,
-            legend=dict(orientation="h", yanchor="bottom", y=-0.2, xanchor="center", x=0.5)
-        )
-        st.plotly_chart(fig_pie, use_container_width=True)
+# --- Tab 3: 环形图 ---
+with tab3:
+    if not models:
+        pass
+    else:
+        # 为了让图表不至于太宽，可以放在一个居中的列里
+        col_pie_left, col_pie_center, col_pie_right = st.columns([1, 2, 1])
+        
+        with col_pie_center:
+            fig_pie = px.pie(
+                pie_chart_data, values='消耗占比', names='模型名称', hole=0.6,
+                color_discrete_sequence=px.colors.qualitative.Pastel
+            )
+            fig_pie.update_traces(textinfo='percent', textposition='inside', hoverinfo='label+value')
+            fig_pie.update_layout(
+                margin=dict(t=20, b=20, l=20, r=20), height=400, showlegend=True,
+                legend=dict(orientation="h", yanchor="bottom", y=-0.2, xanchor="center", x=0.5)
+            )
+            st.plotly_chart(fig_pie, use_container_width=True)
 
     # streamlit run backend/app.py
