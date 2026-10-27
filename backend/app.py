@@ -227,7 +227,7 @@ with col1:
 with col2:
     st.metric(
         label="订阅类型",
-        value=quota_info['account_status']
+        value=quota_info.get("account_status", "未知账户类型")
     )
 with col3:
     st.metric(
