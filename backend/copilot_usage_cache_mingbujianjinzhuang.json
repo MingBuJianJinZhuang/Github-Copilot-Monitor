@@ -1,5 +1,5 @@
 {
-  "cached_at": "2026-10-27T13:58:15.902945+00:00",
+  "cached_at": "2026-10-27T14:15:06.703213+00:00",
   "data": {
     "id": 172981220,
     "login": "MingBuJianJinZhuang",
@@ -40,7 +40,7 @@
         "quota_id": "chat",
         "quota_remaining": 0.0,
         "unlimited": true,
-        "timestamp_utc": "2026-10-27T13:58:13.213Z",
+        "timestamp_utc": "2026-10-27T14:15:04.626Z",
         "has_quota": true,
         "quota_reset_at": 0,
         "token_based_billing": true,
@@ -56,7 +56,7 @@
         "quota_id": "completions",
         "quota_remaining": 0.0,
         "unlimited": true,
-        "timestamp_utc": "2026-10-27T13:58:13.213Z",
+        "timestamp_utc": "2026-10-27T14:15:04.626Z",
         "has_quota": true,
         "quota_reset_at": 0,
         "token_based_billing": true,
@@ -72,7 +72,7 @@
         "quota_id": "premium_interactions",
         "quota_remaining": 126.6,
         "unlimited": false,
-        "timestamp_utc": "2026-10-27T13:58:13.213Z",
+        "timestamp_utc": "2026-10-27T14:15:04.626Z",
         "has_quota": true,
         "quota_reset_at": 0,
         "token_based_billing": true,

@@ -165,3 +165,18 @@ ValueError: copilot_internal/user 响应中缺少有效的 limited_user_quotas
 2026-10-27 22:05:41 - INFO - _client - HTTP Request: GET https://fjhybimdrtczzuhbmkbh.supabase.co/rest/v1/total_daily_usage?select=record_date%2Cused_credits&username=eq.herrydeng2004&record_date=like.2026-10%25&order=record_date.asc "HTTP/2 200 OK"
 2026-10-27 22:05:42 - INFO - _client - HTTP Request: GET https://fjhybimdrtczzuhbmkbh.supabase.co/rest/v1/model_daily_usage?select=record_date%2Cmodel_name%2Cused_credits&username=eq.herrydeng2004&record_date=like.2026-10%25&order=record_date.asc "HTTP/2 200 OK"
 2026-10-27 22:13:06 - INFO - authenticate - 用户登录成功
+2026-10-27 22:13:08 - INFO - database - Supabase 客户端初始化完成；请确认使用的是 service_role/secret key，否则启用 RLS 后无法写入数据。
+2026-10-27 22:13:08 - INFO - database - Supabase 数据库连接初始化完成，当前用户：mingbujianjinzhuang
+2026-10-27 22:13:08 - INFO - api_client - 数据刷新：获取失败，使用本地缓存数据
+2026-10-27 22:13:08 - WARNING - core_logic - 免费账户响应中缺少有效的 limited_user_quotas，改用 quota_snapshots 兼容计算额度
+2026-10-27 22:13:08 - INFO - core_logic - 配额信息解析完成
+2026-10-27 22:13:08 - INFO - core_logic - 模型使用量聚合完成
+2026-10-27 22:13:08 - INFO - core_logic - 桌面客户端响应数据构建完成
+2026-10-27 22:13:15 - INFO - _client - HTTP Request: POST https://fjhybimdrtczzuhbmkbh.supabase.co/rest/v1/total_daily_usage?on_conflict=record_date%2Cusername "HTTP/2 200 OK"
+2026-10-27 22:13:16 - INFO - _client - HTTP Request: DELETE https://fjhybimdrtczzuhbmkbh.supabase.co/rest/v1/model_daily_usage?record_date=eq.2026-10-27&username=eq.mingbujianjinzhuang "HTTP/2 200 OK"
+2026-10-27 22:13:17 - INFO - _client - HTTP Request: POST https://fjhybimdrtczzuhbmkbh.supabase.co/rest/v1/model_daily_usage?on_conflict=record_date%2Cusername%2Cmodel_name&columns=%22username%22%2C%22used_credits%22%2C%22record_date%22%2C%22model_name%22 "HTTP/2 201 Created"
+2026-10-27 22:13:17 - INFO - database - Supabase 数据库保存成功：总额度和模型用量已更新
+2026-10-27 22:13:17 - INFO - app - 页面数据刷新流程全部成功完成。
+2026-10-27 22:13:18 - INFO - _client - HTTP Request: GET https://fjhybimdrtczzuhbmkbh.supabase.co/rest/v1/total_daily_usage?select=record_date%2Cused_credits&username=eq.mingbujianjinzhuang&record_date=like.2026-10%25&order=record_date.asc "HTTP/2 200 OK"
+2026-10-27 22:13:18 - INFO - _client - HTTP Request: GET https://fjhybimdrtczzuhbmkbh.supabase.co/rest/v1/model_daily_usage?select=record_date%2Cmodel_name%2Cused_credits&username=eq.mingbujianjinzhuang&record_date=like.2026-10%25&order=record_date.asc "HTTP/2 200 OK"
+2026-10-27 22:14:59 - INFO - authenticate - 用户登录成功
