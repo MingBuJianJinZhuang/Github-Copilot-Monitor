@@ -4,6 +4,7 @@ import time
 import streamlit as st
 import pandas as pd
 import plotly.express as px
+import plotly.graph_objects as go  # 👈 新增：用于画平滑面积图
 
 import authenticate
 from logger_setup import setup_logger
