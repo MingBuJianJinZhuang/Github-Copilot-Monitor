@@ -19,3 +19,6 @@ __pycache__/
 
 # 环境变量文件（包含敏感信息）
 .env
+
+# Streamlit 配置文件（包含敏感信息）
+.streamlit/secrets.toml

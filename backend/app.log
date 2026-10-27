@@ -10,3 +10,21 @@
 2026-10-23 08:35:25 - INFO - api_client - 数据拉取成功，并已更新本地 JSON 缓存
 2026-10-23 08:35:25 - INFO - database - 数据库保存成功：总额度和模型消耗数据已更新
 2026-10-23 08:35:25 - INFO - app - 页面数据刷新流程全部成功完成。
+2026-10-27 20:42:58 - INFO - authenticate - 用户登录成功
+2026-10-27 20:42:58 - ERROR - database - Supabase 数据库连接初始化失败
+Traceback (most recent call last):
+  File "D:\Python\Github Copilot Monitor\backend\database.py", line 73, in initialize_database
+    _get_supabase_client()
+  File "D:\Python\Github Copilot Monitor\backend\database.py", line 24, in _get_supabase_client
+    supabase_config = get_secret("supabase")
+                      ^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Python\Github Copilot Monitor\backend\database.py", line 22, in get_secret
+    return config[name] if name in config else None
+                           ^^^^^^^^^^^^^^
+  File "d:\Python\Github Copilot Monitor\.venv\Lib\site-packages\streamlit\runtime\secrets.py", line 567, in __contains__
+    return key in self._parse()
+                  ^^^^^^^^^^^^^
+  File "d:\Python\Github Copilot Monitor\.venv\Lib\site-packages\streamlit\runtime\secrets.py", line 334, in _parse
+    raise StreamlitSecretNotFoundError(
+streamlit.errors.StreamlitSecretNotFoundError: No secrets found. Valid paths for a secrets.toml file or secret directories are: C:\Users\86135\.streamlit\secrets.toml, D:\Python\Github Copilot Monitor\.streamlit\secrets.toml, D:\Python\Github Copilot Monitor\backend\.streamlit\secrets.toml
+2026-10-27 20:53:31 - INFO - authenticate - 用户登录成功

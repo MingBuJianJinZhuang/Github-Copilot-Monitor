@@ -324,6 +324,7 @@ with tab2:
         pass # 上面已经处理了为空的情况
     else:
         # 绘制横向柱状图
+        st.markdown("**各模型消耗数量 (Gross)**")
         df_chart = df.sort_values(by="消耗数量 (Gross)", ascending=True)
         fig_bar = px.bar(
             df_chart, x="消耗数量 (Gross)", y="模型名称", orientation='h',
@@ -356,6 +357,7 @@ with tab3:
         pass
     else:
         # 为了让图表不至于太宽，可以放在一个居中的列里
+        st.markdown("**各模型消耗占比**")
         col_pie_left, col_pie_center, col_pie_right = st.columns([1, 2, 1])
         
         with col_pie_center:
