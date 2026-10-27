@@ -1,6 +1,7 @@
 # Streamlit 面板和 GitHub API 客户端的运行依赖。
 # Supabase 提供 PostgreSQL 数据库访问能力。
 supabase==2.27.0
+streamlit-elements==0.1.0
 pandas==3.0.6
 plotly==7.1.0
 python-dotenv==1.2.4
