@@ -60,6 +60,21 @@ st.markdown("""
     overflow-x: hidden;
 }
 
+/* 卡片化容器 (新增：给所有内容块加圆角、白底和微阴影) */
+[data-testid="stVerticalBlockBorderWrapper"] {
+    background-color: #ffffff;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+    border: 1px solid #f0f2f6;
+}
+
+/* 优化原生标题边距 */
+h2, h3 {
+    margin-top: 0.5rem !important;
+    margin-bottom: 1rem !important;
+}
+
 /* 移动端适配 (屏幕宽度 < 768px) */
 @media (max-width: 768px) {
     /* 1. 强行将主内容区往下推，留出顶部工具栏的空间 (关键修复) */
@@ -87,6 +102,7 @@ st.markdown("""
     width: 100% !important;
     max-width: 100vw;
 }
+
 </style>
 """, unsafe_allow_html=True)
 st.title("🤖 GitHub Copilot 额度监控")
