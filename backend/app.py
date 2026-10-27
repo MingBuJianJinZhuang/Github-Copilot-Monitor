@@ -183,7 +183,7 @@ with st.spinner("正在获取最新数据..."):
 
         # 伪造一个基本的 quota_info 字典，确保后续代码可以正常运行
         quota_info = {
-            "access_type_sku": "未知",
+            "account_status": "未知账户类型",
             "included_credits": included_credits,
             "remaining_credits": remaining_credits,
             "used_credits": used_credits,
@@ -226,8 +226,8 @@ with col1:
     )
 with col2:
     st.metric(
-        label="SKU(库存量单位)",
-        value=quota_info['access_type_sku']
+        label="订阅类型",
+        value=quota_info['account_status']
     )
 with col3:
     st.metric(
@@ -258,7 +258,7 @@ now = datetime.now()
 
 # 预处理表格和饼图的数据（提取到 tabs 外面，避免重复计算）
 if not models:
-    st.write("当前月份暂无消耗记录。")
+    logger.info("当前月份暂无消耗记录，跳过图表和表格渲染。")
 else:
     table_data = []
     for model_name, stats in models.items():
@@ -281,6 +281,8 @@ tab1, tab2, tab3 = st.tabs(["📈 消耗趋势图", "📊 模型明细表", "�
 
 # --- Tab 1: 趋势图 ---
 with tab1:
+    if not models:
+        st.info("当前月份暂无消耗记录。")
     col_total, col_model = st.columns(2)
     
     with col_total:
@@ -306,7 +308,7 @@ with tab1:
             )
             st.plotly_chart(fig_total, use_container_width=True)
         else:
-            st.write("暂无总额度历史数据。")
+            logger.info("当前月份暂无整体消耗历史数据，跳过整体趋势图渲染。")
 
     with col_model:
         st.markdown("**各模型消耗趋势**")
@@ -316,12 +318,12 @@ with tab1:
             df_model_pivot = df_model.pivot(index="日期", columns="模型名称", values="已用额度(Model)").fillna(0).sort_index()
             st.line_chart(df_model_pivot, use_container_width=True)
         else:
-            st.write("暂无模型消耗历史数据。")
+            logger.info("当前月份暂无模型消耗历史数据，跳过模型趋势图渲染。")
 
 # --- Tab 2: 表格与柱状图 ---
 with tab2:
     if not models:
-        pass # 上面已经处理了为空的情况
+        st.info("当前月份暂无消耗记录。")
     else:
         # 绘制横向柱状图
         st.markdown("**各模型消耗数量 (Gross)**")
@@ -354,7 +356,7 @@ with tab2:
 # --- Tab 3: 环形图 ---
 with tab3:
     if not models:
-        pass
+        st.info("当前月份暂无消耗记录。")
     else:
         # 为了让图表不至于太宽，可以放在一个居中的列里
         st.markdown("**各模型消耗占比**")

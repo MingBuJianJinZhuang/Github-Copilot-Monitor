@@ -28,3 +28,140 @@ Traceback (most recent call last):
     raise StreamlitSecretNotFoundError(
 streamlit.errors.StreamlitSecretNotFoundError: No secrets found. Valid paths for a secrets.toml file or secret directories are: C:\Users\86135\.streamlit\secrets.toml, D:\Python\Github Copilot Monitor\.streamlit\secrets.toml, D:\Python\Github Copilot Monitor\backend\.streamlit\secrets.toml
 2026-10-27 20:53:31 - INFO - authenticate - 用户登录成功
+2026-10-27 20:53:35 - INFO - database - Supabase 客户端初始化完成；请确认使用的是 service_role/secret key，否则启用 RLS 后无法写入数据。
+2026-10-27 20:53:35 - INFO - database - Supabase 数据库连接初始化完成，当前用户：mingbujianjinzhuang
+2026-10-27 20:53:35 - INFO - api_client - 数据刷新：正在从 GitHub 获取最新数据
+2026-10-27 20:53:40 - INFO - api_client - 数据拉取成功，并已更新本地 JSON 缓存
+2026-10-27 20:53:40 - INFO - core_logic - 配额信息解析完成
+2026-10-27 20:53:40 - INFO - core_logic - 模型使用量聚合完成
+2026-10-27 20:53:40 - INFO - core_logic - 桌面客户端响应数据构建完成
+2026-10-27 20:53:45 - INFO - _client - HTTP Request: POST https://fjhybimdrtczzuhbmkbh.supabase.co/rest/v1/total_daily_usage?on_conflict=record_date%2Cusername "HTTP/2 200 OK"
+2026-10-27 20:53:46 - INFO - _client - HTTP Request: DELETE https://fjhybimdrtczzuhbmkbh.supabase.co/rest/v1/model_daily_usage?record_date=eq.2026-10-27&username=eq.mingbujianjinzhuang "HTTP/2 200 OK"
+2026-10-27 20:53:47 - INFO - _client - HTTP Request: POST https://fjhybimdrtczzuhbmkbh.supabase.co/rest/v1/model_daily_usage?on_conflict=record_date%2Cusername%2Cmodel_name&columns=%22record_date%22%2C%22username%22%2C%22model_name%22%2C%22used_credits%22 "HTTP/2 201 Created"
+2026-10-27 20:53:47 - INFO - database - Supabase 数据库保存成功：总额度和模型用量已更新
+2026-10-27 20:53:47 - INFO - app - 页面数据刷新流程全部成功完成。
+2026-10-27 20:53:48 - INFO - _client - HTTP Request: GET https://fjhybimdrtczzuhbmkbh.supabase.co/rest/v1/total_daily_usage?select=record_date%2Cused_credits&username=eq.mingbujianjinzhuang&record_date=like.2026-10%25&order=record_date.asc "HTTP/2 200 OK"
+2026-10-27 20:53:50 - INFO - _client - HTTP Request: GET https://fjhybimdrtczzuhbmkbh.supabase.co/rest/v1/model_daily_usage?select=record_date%2Cmodel_name%2Cused_credits&username=eq.mingbujianjinzhuang&record_date=like.2026-10%25&order=record_date.asc "HTTP/2 200 OK"
+2026-10-27 21:16:45 - INFO - authenticate - 用户登录成功
+2026-10-27 21:16:48 - INFO - database - Supabase 客户端初始化完成；请确认使用的是 service_role/secret key，否则启用 RLS 后无法写入数据。
+2026-10-27 21:16:48 - INFO - database - Supabase 数据库连接初始化完成，当前用户：mingbujianjinzhuang
+2026-10-27 21:16:48 - INFO - api_client - 数据刷新：正在从 GitHub 获取最新数据
+2026-10-27 21:16:54 - INFO - api_client - 数据拉取成功，并已更新本地 JSON 缓存
+2026-10-27 21:16:54 - INFO - core_logic - 配额信息解析完成
+2026-10-27 21:16:54 - INFO - core_logic - 模型使用量聚合完成
+2026-10-27 21:16:54 - INFO - core_logic - 桌面客户端响应数据构建完成
+2026-10-27 21:16:59 - INFO - _client - HTTP Request: POST https://fjhybimdrtczzuhbmkbh.supabase.co/rest/v1/total_daily_usage?on_conflict=record_date%2Cusername "HTTP/2 200 OK"
+2026-10-27 21:17:00 - INFO - _client - HTTP Request: DELETE https://fjhybimdrtczzuhbmkbh.supabase.co/rest/v1/model_daily_usage?record_date=eq.2026-10-27&username=eq.mingbujianjinzhuang "HTTP/2 200 OK"
+2026-10-27 21:17:00 - INFO - _client - HTTP Request: POST https://fjhybimdrtczzuhbmkbh.supabase.co/rest/v1/model_daily_usage?on_conflict=record_date%2Cusername%2Cmodel_name&columns=%22username%22%2C%22used_credits%22%2C%22model_name%22%2C%22record_date%22 "HTTP/2 201 Created"
+2026-10-27 21:17:00 - INFO - database - Supabase 数据库保存成功：总额度和模型用量已更新
+2026-10-27 21:17:00 - INFO - app - 页面数据刷新流程全部成功完成。
+2026-10-27 21:17:02 - INFO - _client - HTTP Request: GET https://fjhybimdrtczzuhbmkbh.supabase.co/rest/v1/total_daily_usage?select=record_date%2Cused_credits&username=eq.mingbujianjinzhuang&record_date=like.2026-10%25&order=record_date.asc "HTTP/2 200 OK"
+2026-10-27 21:17:03 - INFO - _client - HTTP Request: GET https://fjhybimdrtczzuhbmkbh.supabase.co/rest/v1/model_daily_usage?select=record_date%2Cmodel_name%2Cused_credits&username=eq.mingbujianjinzhuang&record_date=like.2026-10%25&order=record_date.asc "HTTP/2 200 OK"
+2026-10-27 21:33:55 - INFO - authenticate - 用户登录成功
+2026-10-27 21:33:57 - INFO - database - Supabase 客户端初始化完成；请确认使用的是 service_role/secret key，否则启用 RLS 后无法写入数据。
+2026-10-27 21:33:57 - INFO - database - Supabase 数据库连接初始化完成，当前用户：herrydeng2004
+2026-10-27 21:33:57 - INFO - api_client - 数据刷新：正在从 GitHub 获取最新数据
+2026-10-27 21:34:02 - INFO - api_client - 数据拉取成功，并已更新本地 JSON 缓存
+2026-10-27 21:34:02 - INFO - core_logic - 配额信息解析完成
+2026-10-27 21:34:02 - INFO - core_logic - 模型使用量聚合完成
+2026-10-27 21:34:02 - INFO - core_logic - 桌面客户端响应数据构建完成
+2026-10-27 21:34:06 - INFO - _client - HTTP Request: POST https://fjhybimdrtczzuhbmkbh.supabase.co/rest/v1/total_daily_usage?on_conflict=record_date%2Cusername "HTTP/2 200 OK"
+2026-10-27 21:34:07 - INFO - _client - HTTP Request: DELETE https://fjhybimdrtczzuhbmkbh.supabase.co/rest/v1/model_daily_usage?record_date=eq.2026-10-27&username=eq.herrydeng2004 "HTTP/2 200 OK"
+2026-10-27 21:34:07 - INFO - database - Supabase 数据库保存成功：总额度和模型用量已更新
+2026-10-27 21:34:07 - INFO - app - 页面数据刷新流程全部成功完成。
+2026-10-27 21:34:08 - INFO - _client - HTTP Request: GET https://fjhybimdrtczzuhbmkbh.supabase.co/rest/v1/total_daily_usage?select=record_date%2Cused_credits&username=eq.herrydeng2004&record_date=like.2026-10%25&order=record_date.asc "HTTP/2 200 OK"
+2026-10-27 21:34:09 - INFO - _client - HTTP Request: GET https://fjhybimdrtczzuhbmkbh.supabase.co/rest/v1/model_daily_usage?select=record_date%2Cmodel_name%2Cused_credits&username=eq.herrydeng2004&record_date=like.2026-10%25&order=record_date.asc "HTTP/2 200 OK"
+2026-10-27 21:38:02 - INFO - authenticate - 用户登录成功
+2026-10-27 21:38:04 - INFO - database - Supabase 客户端初始化完成；请确认使用的是 service_role/secret key，否则启用 RLS 后无法写入数据。
+2026-10-27 21:38:04 - INFO - database - Supabase 数据库连接初始化完成，当前用户：herrydeng2004
+2026-10-27 21:38:04 - INFO - api_client - 数据刷新：获取失败，使用本地缓存数据
+2026-10-27 21:38:04 - INFO - core_logic - 配额信息解析完成
+2026-10-27 21:38:04 - INFO - core_logic - 模型使用量聚合完成
+2026-10-27 21:38:04 - INFO - core_logic - 桌面客户端响应数据构建完成
+2026-10-27 21:38:09 - INFO - _client - HTTP Request: POST https://fjhybimdrtczzuhbmkbh.supabase.co/rest/v1/total_daily_usage?on_conflict=record_date%2Cusername "HTTP/2 200 OK"
+2026-10-27 21:38:10 - INFO - _client - HTTP Request: DELETE https://fjhybimdrtczzuhbmkbh.supabase.co/rest/v1/model_daily_usage?record_date=eq.2026-10-27&username=eq.herrydeng2004 "HTTP/2 200 OK"
+2026-10-27 21:38:10 - INFO - database - Supabase 数据库保存成功：总额度和模型用量已更新
+2026-10-27 21:38:10 - INFO - app - 页面数据刷新流程全部成功完成。
+2026-10-27 21:38:11 - INFO - _client - HTTP Request: GET https://fjhybimdrtczzuhbmkbh.supabase.co/rest/v1/total_daily_usage?select=record_date%2Cused_credits&username=eq.herrydeng2004&record_date=like.2026-10%25&order=record_date.asc "HTTP/2 200 OK"
+2026-10-27 21:38:11 - INFO - _client - HTTP Request: GET https://fjhybimdrtczzuhbmkbh.supabase.co/rest/v1/model_daily_usage?select=record_date%2Cmodel_name%2Cused_credits&username=eq.herrydeng2004&record_date=like.2026-10%25&order=record_date.asc "HTTP/2 200 OK"
+2026-10-27 21:46:02 - INFO - authenticate - 用户登录成功
+2026-10-27 21:46:03 - INFO - database - Supabase 客户端初始化完成；请确认使用的是 service_role/secret key，否则启用 RLS 后无法写入数据。
+2026-10-27 21:46:03 - INFO - database - Supabase 数据库连接初始化完成，当前用户：herrydeng2004
+2026-10-27 21:46:03 - INFO - api_client - 数据刷新：获取失败，使用本地缓存数据
+2026-10-27 21:46:03 - ERROR - app - 页面渲染时发生严重错误，已降级为离线模式。
+Traceback (most recent call last):
+  File "D:\Python\Github Copilot Monitor\backend\app.py", line 152, in <module>
+    quota_info = calculate_quota_status(api_data)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Python\Github Copilot Monitor\backend\core_logic.py", line 24, in calculate_quota_status
+    quota = _get_quota_record(quota_snapshots, quota_name)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Python\Github Copilot Monitor\backend\core_logic.py", line 69, in _get_quota_record
+    raise ValueError(f"copilot_internal/user 响应中缺少有效的 {quota_name}")
+ValueError: copilot_internal/user 响应中缺少有效的 limited_user_quotas
+2026-10-27 21:46:12 - INFO - _client - HTTP Request: GET https://fjhybimdrtczzuhbmkbh.supabase.co/rest/v1/total_daily_usage?select=record_date%2Cincluded_credits%2Cused_credits%2Cremaining_credits&username=eq.herrydeng2004&order=record_date.desc&limit=1 "HTTP/2 200 OK"
+2026-10-27 21:46:12 - INFO - app - 最近的历史缓存数据已成功加载，页面将使用离线模式显示。
+2026-10-27 21:46:13 - INFO - _client - HTTP Request: GET https://fjhybimdrtczzuhbmkbh.supabase.co/rest/v1/model_daily_usage?select=model_name%2Cused_credits&username=eq.herrydeng2004&record_date=eq.2026-10-27 "HTTP/2 200 OK"
+2026-10-27 21:46:14 - INFO - _client - HTTP Request: GET https://fjhybimdrtczzuhbmkbh.supabase.co/rest/v1/total_daily_usage?select=record_date%2Cused_credits&username=eq.herrydeng2004&record_date=like.2026-10%25&order=record_date.asc "HTTP/2 200 OK"
+2026-10-27 21:46:15 - INFO - _client - HTTP Request: GET https://fjhybimdrtczzuhbmkbh.supabase.co/rest/v1/model_daily_usage?select=record_date%2Cmodel_name%2Cused_credits&username=eq.herrydeng2004&record_date=like.2026-10%25&order=record_date.asc "HTTP/2 200 OK"
+2026-10-27 21:47:50 - INFO - authenticate - 用户登录成功
+2026-10-27 21:47:51 - INFO - database - Supabase 客户端初始化完成；请确认使用的是 service_role/secret key，否则启用 RLS 后无法写入数据。
+2026-10-27 21:47:51 - INFO - database - Supabase 数据库连接初始化完成，当前用户：herrydeng2004
+2026-10-27 21:47:51 - INFO - api_client - 数据刷新：获取失败，使用本地缓存数据
+2026-10-27 21:47:51 - WARNING - core_logic - 免费账户响应中缺少有效的 limited_user_quotas，改用 quota_snapshots 兼容计算额度
+2026-10-27 21:47:51 - INFO - core_logic - 配额信息解析完成
+2026-10-27 21:47:51 - INFO - core_logic - 模型使用量聚合完成
+2026-10-27 21:47:51 - INFO - core_logic - 桌面客户端响应数据构建完成
+2026-10-27 21:47:56 - INFO - _client - HTTP Request: POST https://fjhybimdrtczzuhbmkbh.supabase.co/rest/v1/total_daily_usage?on_conflict=record_date%2Cusername "HTTP/2 200 OK"
+2026-10-27 21:47:57 - INFO - _client - HTTP Request: DELETE https://fjhybimdrtczzuhbmkbh.supabase.co/rest/v1/model_daily_usage?record_date=eq.2026-10-27&username=eq.herrydeng2004 "HTTP/2 200 OK"
+2026-10-27 21:47:57 - INFO - database - Supabase 数据库保存成功：总额度和模型用量已更新
+2026-10-27 21:47:57 - INFO - app - 页面数据刷新流程全部成功完成。
+2026-10-27 21:47:57 - INFO - _client - HTTP Request: GET https://fjhybimdrtczzuhbmkbh.supabase.co/rest/v1/total_daily_usage?select=record_date%2Cused_credits&username=eq.herrydeng2004&record_date=like.2026-10%25&order=record_date.asc "HTTP/2 200 OK"
+2026-10-27 21:47:58 - INFO - _client - HTTP Request: GET https://fjhybimdrtczzuhbmkbh.supabase.co/rest/v1/model_daily_usage?select=record_date%2Cmodel_name%2Cused_credits&username=eq.herrydeng2004&record_date=like.2026-10%25&order=record_date.asc "HTTP/2 200 OK"
+2026-10-27 21:58:08 - INFO - authenticate - 用户登录成功
+2026-10-27 21:58:10 - INFO - database - Supabase 客户端初始化完成；请确认使用的是 service_role/secret key，否则启用 RLS 后无法写入数据。
+2026-10-27 21:58:10 - INFO - database - Supabase 数据库连接初始化完成，当前用户：mingbujianjinzhuang
+2026-10-27 21:58:10 - INFO - api_client - 数据刷新：正在从 GitHub 获取最新数据
+2026-10-27 21:58:15 - INFO - api_client - 数据拉取成功，并已更新本地 JSON 缓存
+2026-10-27 21:58:15 - WARNING - core_logic - 免费账户响应中缺少有效的 limited_user_quotas，改用 quota_snapshots 兼容计算额度
+2026-10-27 21:58:15 - INFO - core_logic - 配额信息解析完成
+2026-10-27 21:58:15 - INFO - core_logic - 模型使用量聚合完成
+2026-10-27 21:58:15 - INFO - core_logic - 桌面客户端响应数据构建完成
+2026-10-27 21:58:25 - INFO - _client - HTTP Request: POST https://fjhybimdrtczzuhbmkbh.supabase.co/rest/v1/total_daily_usage?on_conflict=record_date%2Cusername "HTTP/2 200 OK"
+2026-10-27 21:58:26 - INFO - _client - HTTP Request: DELETE https://fjhybimdrtczzuhbmkbh.supabase.co/rest/v1/model_daily_usage?record_date=eq.2026-10-27&username=eq.mingbujianjinzhuang "HTTP/2 200 OK"
+2026-10-27 21:58:27 - INFO - _client - HTTP Request: POST https://fjhybimdrtczzuhbmkbh.supabase.co/rest/v1/model_daily_usage?on_conflict=record_date%2Cusername%2Cmodel_name&columns=%22record_date%22%2C%22model_name%22%2C%22username%22%2C%22used_credits%22 "HTTP/2 201 Created"
+2026-10-27 21:58:27 - INFO - database - Supabase 数据库保存成功：总额度和模型用量已更新
+2026-10-27 21:58:27 - INFO - app - 页面数据刷新流程全部成功完成。
+2026-10-27 21:58:27 - INFO - _client - HTTP Request: GET https://fjhybimdrtczzuhbmkbh.supabase.co/rest/v1/total_daily_usage?select=record_date%2Cused_credits&username=eq.mingbujianjinzhuang&record_date=like.2026-10%25&order=record_date.asc "HTTP/2 200 OK"
+2026-10-27 21:58:28 - INFO - _client - HTTP Request: GET https://fjhybimdrtczzuhbmkbh.supabase.co/rest/v1/model_daily_usage?select=record_date%2Cmodel_name%2Cused_credits&username=eq.mingbujianjinzhuang&record_date=like.2026-10%25&order=record_date.asc "HTTP/2 200 OK"
+2026-10-27 22:03:01 - INFO - authenticate - 用户登录成功
+2026-10-27 22:03:03 - INFO - database - Supabase 客户端初始化完成；请确认使用的是 service_role/secret key，否则启用 RLS 后无法写入数据。
+2026-10-27 22:03:03 - INFO - database - Supabase 数据库连接初始化完成，当前用户：mingbujianjinzhuang
+2026-10-27 22:03:03 - INFO - api_client - 数据刷新：获取失败，使用本地缓存数据
+2026-10-27 22:03:03 - WARNING - core_logic - 免费账户响应中缺少有效的 limited_user_quotas，改用 quota_snapshots 兼容计算额度
+2026-10-27 22:03:03 - INFO - core_logic - 配额信息解析完成
+2026-10-27 22:03:03 - INFO - core_logic - 模型使用量聚合完成
+2026-10-27 22:03:03 - INFO - core_logic - 桌面客户端响应数据构建完成
+2026-10-27 22:03:09 - INFO - _client - HTTP Request: POST https://fjhybimdrtczzuhbmkbh.supabase.co/rest/v1/total_daily_usage?on_conflict=record_date%2Cusername "HTTP/2 200 OK"
+2026-10-27 22:03:10 - INFO - _client - HTTP Request: DELETE https://fjhybimdrtczzuhbmkbh.supabase.co/rest/v1/model_daily_usage?record_date=eq.2026-10-27&username=eq.mingbujianjinzhuang "HTTP/2 200 OK"
+2026-10-27 22:03:11 - INFO - _client - HTTP Request: POST https://fjhybimdrtczzuhbmkbh.supabase.co/rest/v1/model_daily_usage?on_conflict=record_date%2Cusername%2Cmodel_name&columns=%22used_credits%22%2C%22record_date%22%2C%22username%22%2C%22model_name%22 "HTTP/2 201 Created"
+2026-10-27 22:03:11 - INFO - database - Supabase 数据库保存成功：总额度和模型用量已更新
+2026-10-27 22:03:11 - INFO - app - 页面数据刷新流程全部成功完成。
+2026-10-27 22:03:12 - INFO - _client - HTTP Request: GET https://fjhybimdrtczzuhbmkbh.supabase.co/rest/v1/total_daily_usage?select=record_date%2Cused_credits&username=eq.mingbujianjinzhuang&record_date=like.2026-10%25&order=record_date.asc "HTTP/2 200 OK"
+2026-10-27 22:03:13 - INFO - _client - HTTP Request: GET https://fjhybimdrtczzuhbmkbh.supabase.co/rest/v1/model_daily_usage?select=record_date%2Cmodel_name%2Cused_credits&username=eq.mingbujianjinzhuang&record_date=like.2026-10%25&order=record_date.asc "HTTP/2 200 OK"
+2026-10-27 22:04:48 - INFO - authenticate - 用户已登出，清除会话状态
+2026-10-27 22:05:32 - INFO - authenticate - 用户登录成功
+2026-10-27 22:05:32 - INFO - database - Supabase 数据库连接初始化完成，当前用户：herrydeng2004
+2026-10-27 22:05:32 - INFO - api_client - 数据刷新：正在从 GitHub 获取最新数据
+2026-10-27 22:05:37 - INFO - api_client - 数据拉取成功，并已更新本地 JSON 缓存
+2026-10-27 22:05:37 - WARNING - core_logic - 免费账户响应中缺少有效的 limited_user_quotas，改用 quota_snapshots 兼容计算额度
+2026-10-27 22:05:37 - INFO - core_logic - 配额信息解析完成
+2026-10-27 22:05:37 - INFO - core_logic - 模型使用量聚合完成
+2026-10-27 22:05:37 - INFO - core_logic - 桌面客户端响应数据构建完成
+2026-10-27 22:05:40 - INFO - _client - HTTP Request: POST https://fjhybimdrtczzuhbmkbh.supabase.co/rest/v1/total_daily_usage?on_conflict=record_date%2Cusername "HTTP/2 200 OK"
+2026-10-27 22:05:41 - INFO - _client - HTTP Request: DELETE https://fjhybimdrtczzuhbmkbh.supabase.co/rest/v1/model_daily_usage?record_date=eq.2026-10-27&username=eq.herrydeng2004 "HTTP/2 200 OK"
+2026-10-27 22:05:41 - INFO - database - Supabase 数据库保存成功：总额度和模型用量已更新
+2026-10-27 22:05:41 - INFO - app - 页面数据刷新流程全部成功完成。
+2026-10-27 22:05:41 - INFO - _client - HTTP Request: GET https://fjhybimdrtczzuhbmkbh.supabase.co/rest/v1/total_daily_usage?select=record_date%2Cused_credits&username=eq.herrydeng2004&record_date=like.2026-10%25&order=record_date.asc "HTTP/2 200 OK"
+2026-10-27 22:05:42 - INFO - _client - HTTP Request: GET https://fjhybimdrtczzuhbmkbh.supabase.co/rest/v1/model_daily_usage?select=record_date%2Cmodel_name%2Cused_credits&username=eq.herrydeng2004&record_date=like.2026-10%25&order=record_date.asc "HTTP/2 200 OK"
+2026-10-27 22:13:06 - INFO - authenticate - 用户登录成功

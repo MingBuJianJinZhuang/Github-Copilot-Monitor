@@ -9,12 +9,27 @@ def calculate_quota_status(api_data: dict):
     """解析配额快照，计算剩余时间等信息"""
     quota_snapshots = api_data.get("quota_snapshots")
     access_type_sku = api_data.get("access_type_sku") # 获取访问类型 SKU
-    if not isinstance(quota_snapshots, dict):
-        raise ValueError("copilot_internal/user 响应中缺少有效的 quota_snapshots")
+    plan = api_data.get("copilot_plan") or ""
+    account_status = get_account_status_desc(plan, access_type_sku)
+    is_free_account = account_status in {
+        "Copilot 免费版",
+        "开源作者专属 Pro",
+        }
+    quota_name = "quota_snapshots"
 
-    premium_quota = quota_snapshots.get("premium_interactions", {})
-    included_credits = premium_quota.get("entitlement", 0)  # 总额度
-    remaining_credits = premium_quota.get("remaining", 0)    # 剩余额度
+    if is_free_account:
+        limited_user_quotas = api_data.get("limited_user_quotas")
+        if limited_user_quotas:
+            quota_snapshots = limited_user_quotas
+            quota_name = "limited_user_quotas"
+        else:
+            logger.warning(
+                "免费账户响应中缺少有效的 limited_user_quotas，"
+                "改用 quota_snapshots 兼容计算额度"
+            )
+    quota = _get_quota_record(quota_snapshots, quota_name)
+    included_credits = _get_quota_value(quota, "entitlement", "quota_limit", "limit")
+    remaining_credits = _get_quota_value(quota, "remaining", "quota_remaining")
     reset_date = api_data.get("quota_reset_date")            # 重置日期
 
     now_utc = datetime.now(timezone.utc)
@@ -39,9 +54,12 @@ def calculate_quota_status(api_data: dict):
 
     logger.info("配额信息解析完成")
 
+    plan = api_data.get("copilot_plan") or ""
+    account_status = get_account_status_desc(plan, access_type_sku)
+
     return {
-        "plan": api_data.get('copilot_plan') or api_data.get('access_type_sku', '未知'),
-        "access_type_sku": access_type_sku or "未知",
+        "plan": plan or "未知",
+        "account_status": account_status,
         "all_quotas": quota_snapshots,
         "included_credits": included_credits,
         "remaining_credits": remaining_credits,
@@ -49,6 +67,34 @@ def calculate_quota_status(api_data: dict):
         "remaining_time_text": remaining_time_text,
         "current_date_str": now_utc.strftime('%Y 年 %m 月 %d 日')
     }
+
+
+def _get_quota_record(quota_data: object, quota_name: str) -> dict:
+    """从不同账户类型的额度响应中提取额度记录。"""
+    if not isinstance(quota_data, dict):
+        raise ValueError(f"copilot_internal/user 响应中缺少有效的 {quota_name}")
+
+    if any(key in quota_data for key in ("entitlement", "quota_limit", "limit")):
+        return quota_data
+
+    for key in ("premium_interactions", "chat", "completions"):
+        record = quota_data.get(key)
+        if isinstance(record, dict):
+            return record
+
+    raise ValueError(f"{quota_name} 中缺少可识别的额度记录")
+
+
+def _get_quota_value(quota: dict, *keys: str) -> float:
+    """读取额度字段并统一转换为数值。"""
+    for key in keys:
+        value = quota.get(key)
+        if value is not None:
+            try:
+                return float(value)
+            except (TypeError, ValueError) as error:
+                raise ValueError(f"额度字段 {key} 不是有效数字") from error
+    raise ValueError(f"额度记录中缺少字段：{'、'.join(keys)}")
 
 
 def aggregate_model_usage(usage_data: dict):
@@ -105,6 +151,28 @@ def aggregate_model_usage(usage_data: dict):
     return result_models , total_gross_quantity
 
 
+def get_account_status_desc(plan: str, sku: str) -> str:
+    """根据 plan 和 sku 返回账户类型描述"""
+    plan = plan.lower() if plan else ""
+    sku = sku.lower() if sku else ""
+
+    if sku == "free_limited_copilot":
+        return "Copilot 免费版"
+    if sku == "free_engaged_oss_quota":
+        return "开源作者专属 Pro"
+    if sku == "free_educational_quota":
+        return "Copilot 学生版"
+    if sku == "plus_monthly_subscriber_quota":
+        return "Copilot Plus 订阅版"
+    # if plan == "individual":
+    #     return "Copilot 个人版 (Pro/Pro+/Max/学生)"
+    if plan == "business":
+        return "Copilot 商业版"
+    if plan == "enterprise":
+        return "Copilot 企业版"
+    return "未知账户类型"
+
+
 def build_desktop_payload(quota_info: dict, models: dict, total_gross: float) -> dict:
     """建立一个稳定的、可序列化为 JSON 的响应，用于桌面客户端"""
     included = quota_info["included_credits"]
@@ -116,7 +184,7 @@ def build_desktop_payload(quota_info: dict, models: dict, total_gross: float) ->
         "schema_version": 1,
         "quota": {
             "plan": quota_info["plan"],
-            "access_type_sku": quota_info["access_type_sku"],
+            "account_status": quota_info["account_status"],
             "all_quotas": quota_info["all_quotas"],
             "included_credits": included,
             "remaining_credits": remaining,
