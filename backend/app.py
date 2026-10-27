@@ -195,7 +195,7 @@ with col1:
     )
 with col2:
     st.metric(
-        label="访问类型 SKU",
+        label="SKU(库存量单位)",
         value=quota_info['access_type_sku']
     )
 with col3:

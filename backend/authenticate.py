@@ -52,18 +52,31 @@ def render_login_page():
     st.markdown("请使用您的 **GitHub 用户名** 和 **Personal Access Token** 登录。")
     st.info("💡 您的 Token 仅保存在当前会话内存中，不会被记录到任何服务器日志中。")
 
+    remembered_username = st.query_params.get("remembered_username", "")
+    remember_username = bool(remembered_username)
+
     with st.form("login_form"):
-        username = st.text_input("GitHub 用户名")
+        username = st.text_input("GitHub 用户名", value=remembered_username)
         token = st.text_input("Personal Access Token", type="password", placeholder="ghp_...")
+        remember_username = st.checkbox(
+            "记住用户名",
+            value=remember_username,
+            help="只保存用户名，不会保存 Personal Access Token。",
+        )
         submitted = st.form_submit_button("登录", use_container_width=True)
 
         if submitted:
             with st.spinner("正在验证凭证..."):
                 is_valid, error_msg = verify_github_credentials(username, token)
                 if is_valid:
+                    normalized_username = username.strip().lower()
                     st.session_state["authenticated"] = True
-                    st.session_state["username"] = username.strip().lower()
+                    st.session_state["username"] = normalized_username
                     st.session_state["token"] = token.strip()
+                    if remember_username:
+                        st.query_params["remembered_username"] = normalized_username
+                    else:
+                        st.query_params.pop("remembered_username", None)
                     st.success("登录成功，正在跳转...")
                     logger.info("用户登录成功")
                     st.rerun()

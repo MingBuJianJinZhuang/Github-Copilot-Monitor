@@ -50,7 +50,7 @@ def fetch_api_data(username: str, token: str):
             "X-GitHub-Api-Version": "2026-03-10",
         }
         # `quota_snapshots` 是 Copilot UI 使用的数据源。
-        logger.info("发起请求：GET https://api.github.com/copilot_internal/user")
+        # logger.info("发起请求：GET https://api.github.com/copilot_internal/user")
         response = requests.get(
             "https://api.github.com/copilot_internal/user",
             headers=Headers,
@@ -64,7 +64,7 @@ def fetch_api_data(username: str, token: str):
 
         # 账单接口提供按模型拆分的实际 AI Credits 消耗。
         usage_url = f"https://api.github.com/users/{username}/settings/billing/ai_credit/usage"
-        logger.info(f"发起请求：GET {usage_url}")
+        # logger.info(f"发起请求：GET {usage_url}")
         usage_response = requests.get(
             usage_url,
             headers=Headers,
