@@ -102,16 +102,28 @@ with col_backfill:
     do_backfill = st.button("📥 回填本月历史数据", use_container_width=True)
 
 if do_backfill:
-    with st.spinner("正在回填历史数据，大约需要 30 秒..."):
-        now = datetime.now()
-        backfill_data = fetch_daily_usage_backfill(current_user, now.year, now.month, current_token)
-        if backfill_data:
-            database.backfill_history(backfill_data, current_user)
-            st.success(f"✅ 成功回填 {len(backfill_data)} 天的历史数据！")
-            time.sleep(1.5)
-            st.rerun()
-        else:
-            st.warning("暂无数据或回填失败。")
+    now = datetime.now()
+    existing_history = database.get_total_usage_history(
+        now.year, now.month, current_user
+    )
+    if existing_history:
+        first_record_date = existing_history[0][0]
+        st.warning(
+            f"⚠️ 当前用户本月已有历史数据（最早记录：{first_record_date}），"
+            "为避免覆盖现有数据，本次未执行回填。"
+        )
+    else:
+        with st.spinner("正在回填历史数据，大约需要 30 秒..."):
+            backfill_data = fetch_daily_usage_backfill(
+                current_user, now.year, now.month, current_token
+            )
+            if backfill_data:
+                database.backfill_history(backfill_data, current_user)
+                st.success(f"✅ 成功回填 {len(backfill_data)} 天的历史数据！")
+                time.sleep(1.5)
+                st.rerun()
+            else:
+                st.warning("暂无数据或回填失败。")
 
 # ================= 数据获取 =================
 # 获取数据；手动刷新时明确绕过 15 分钟缓存。

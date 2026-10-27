@@ -114,7 +114,7 @@ def get_copilot_data(force_refresh=False,username:str="",token:str=""):
 def fetch_daily_usage_backfill(username: str, year: int, month: int, token: str):
     """
     回填指定月份的历史数据。
-    返回格式: { "2026-10-01": {"total": 5.2, "models": {"gpt-4o": 3.0, "claude-3.5": 2.2}}, ... }
+    返回格式 为 { "YYYY-MM-DD": {"total": float, "models": {model_name: float}} }
     """
     today = date.today()
     daily_results = {}
