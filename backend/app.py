@@ -4,6 +4,7 @@ import time
 import streamlit as st
 import pandas as pd
 import plotly.express as px
+from streamlit_elements import dashboard, elements, mui
 
 import authenticate
 from logger_setup import setup_logger
@@ -203,23 +204,36 @@ if data_source == "offline":
 else:
     st.success(f"✅ **数据已实时更新** (更新时间: {update_time_str})")
 
-# 顶部关键指标展示（使用列布局）
-col1, col2, col3 = st.columns(3)
-with col1:
-    st.metric(
-        label="当前订阅计划", 
-        value=quota_info['plan'].upper()
-    )
-with col2:
-    st.metric(
-        label="SKU(库存量单位)",
-        value=quota_info['access_type_sku']
-    )
-with col3:
-    st.metric(
-        label="剩余额度/总额度", 
-        value=f"{quota_info['remaining_credits']}/{quota_info['included_credits']}"
-    )
+# 顶部概览卡片：支持拖动和调整大小
+dashboard_layout = [
+    dashboard.Item("plan", 0, 0, 4, 2),
+    dashboard.Item("sku", 4, 0, 4, 2),
+    dashboard.Item("quota", 8, 0, 4, 2),
+]
+
+with elements("copilot_overview"):
+    with dashboard.Grid(dashboard_layout):
+        with mui.Paper(key="plan", elevation=3, sx={"padding": "20px"}):
+            mui.Typography("当前订阅计划", variant="subtitle2", color="text.secondary")
+            mui.Typography(
+                str(quota_info["plan"]).upper(),
+                variant="h5",
+                sx={"fontWeight": "bold", "marginTop": "8px"},
+            )
+        with mui.Paper(key="sku", elevation=3, sx={"padding": "20px"}):
+            mui.Typography("访问类型 SKU", variant="subtitle2", color="text.secondary")
+            mui.Typography(
+                str(quota_info["access_type_sku"]),
+                variant="h6",
+                sx={"fontWeight": "bold", "marginTop": "8px"},
+            )
+        with mui.Paper(key="quota", elevation=3, sx={"padding": "20px"}):
+            mui.Typography("剩余额度 / 总额度", variant="subtitle2", color="text.secondary")
+            mui.Typography(
+                f"{quota_info['remaining_credits']} / {quota_info['included_credits']}",
+                variant="h5",
+                sx={"fontWeight": "bold", "marginTop": "8px"},
+            )
 
 # 进度条展示
 st.subheader("额度使用情况")
