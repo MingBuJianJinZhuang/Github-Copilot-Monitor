@@ -77,19 +77,16 @@ h2, h3 {
 
 /* 移动端适配 (屏幕宽度 < 768px) */
 @media (max-width: 768px) {
-    /* 1. 强行将主内容区往下推，留出顶部工具栏的空间 (关键修复) */
     .stMainBlockContainer {
         padding-top: 4.5rem !important; 
         padding-left: 1rem !important;
         padding-right: 1rem !important;
         padding-bottom: 1rem !important;
     }
-    
-    /* 2. 调整标题大小和边距 */
     h1 {
         font-size: 1.4rem !important;
         line-height: 1.3 !important;
-        margin-top: 0 !important; /* 去掉原本的顶部外边距，靠 padding 撑开 */
+        margin-top: 0 !important; 
         margin-bottom: 1rem !important;
         word-break: break-word;
     }
@@ -254,121 +251,109 @@ st.info(f"距离额度重置还剩：**{quota_info['remaining_time_text']}** (�
 
 st.divider()
 
-# ================= 表格展示 =================
-# 双表格展示：总额度消耗趋势 & 各模型消耗趋势
+# ================= 图表与明细展示 =================
 st.subheader("📈 额度消耗趋势")
 now = datetime.now()
 
-# 创建左右两列布局
-col_total, col_model = st.columns(2)
+# 使用 Tabs 折叠杂乱的图表 (新增：让界面更干净)
+tab1, tab2 = st.tabs(["📈 消耗趋势图", "📊 各模型明细"])
 
-with col_total:
-    st.subheader("整体已消耗额度趋势")
-    total_usage_history = database.get_total_usage_history(now.year, now.month, current_user)
-    if total_usage_history:
-        df_total = pd.DataFrame(total_usage_history, columns=["日期", "已用额度(Total)"]).set_index("日期")
-        st.line_chart(df_total, use_container_width=True)
+with tab1:
+    col_total, col_model = st.columns(2)
+    
+    with col_total:
+        st.markdown("**整体已消耗额度趋势**")
+        total_usage_history = database.get_total_usage_history(now.year, now.month, current_user)
+        if total_usage_history:
+            df_total = pd.DataFrame(total_usage_history, columns=["日期", "已用额度(Total)"])
+            
+            # 美化：改用 Plotly 平滑面积图
+            fig_total = go.Figure()
+            fig_total.add_trace(go.Scatter(
+                x=df_total["日期"], y=df_total["已用额度(Total)"],
+                mode='lines+markers',
+                line=dict(color='#4A90E2', width=3, shape='spline'),
+                fill='tozeroy', fillcolor='rgba(74, 144, 226, 0.1)',
+                marker=dict(size=6)
+            ))
+            fig_total.update_layout(
+                margin=dict(l=10, r=10, t=10, b=10), height=350,
+                xaxis=dict(tickangle=-45, showgrid=False),
+                yaxis=dict(showgrid=True, gridcolor='#f0f2f6'),
+                plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)'
+            )
+            st.plotly_chart(fig_total, use_container_width=True)
+        else:
+            st.write("暂无总额度历史数据。")
+
+    with col_model:
+        st.markdown("**各模型消耗趋势**")
+        model_usage_history = database.get_model_usage_history(now.year, now.month, current_user)
+        if model_usage_history:
+            df_model = pd.DataFrame(model_usage_history, columns=["日期", "模型名称", "已用额度(Model)"])
+            df_model_pivot = df_model.pivot(index="日期", columns="模型名称", values="已用额度(Model)").fillna(0).sort_index()
+            st.line_chart(df_model_pivot, use_container_width=True)
+        else:
+            st.write("暂无模型消耗历史数据。")
+
+with tab2:
+    if not models:
+        st.write("当前月份暂无消耗记录。")
     else:
-        st.write("暂无总额度历史数据。")
+        # 转换表格数据
+        table_data = []
+        for model_name, stats in models.items():
+            table_data.append({
+                "模型名称": model_name,
+                "消耗数量 (Gross)": round(stats["gross_quantity"], 2),
+                "消耗占比": f"{stats['percentage']:.2f}%",
+                "产生费用 ($)": round(stats["gross_amount"], 4)
+            })
+        table_data = sorted(table_data, key=lambda x: x["消耗数量 (Gross)"], reverse=True)
+        df = pd.DataFrame(table_data)
 
-with col_model:
-    st.subheader("各模型消耗趋势")
-    model_usage_history = database.get_model_usage_history(now.year, now.month, current_user)
-    if model_usage_history:
+        # 1. 绘制横向柱状图 (美化：解决文字竖排问题)
+        df_chart = df.sort_values(by="消耗数量 (Gross)", ascending=True)
+        fig_bar = px.bar(
+            df_chart, x="消耗数量 (Gross)", y="模型名称", orientation='h',
+            text="消耗数量 (Gross)", color="模型名称",
+            color_discrete_sequence=px.colors.qualitative.Pastel
+        )
+        fig_bar.update_layout(
+            showlegend=False, margin=dict(l=0, r=0, t=10, b=0), height=280,
+            xaxis=dict(showgrid=True, gridcolor='#f0f2f6'), yaxis=dict(title="")
+        )
+        fig_bar.update_traces(texttemplate='%{text:.2f}', textposition='outside')
+        st.plotly_chart(fig_bar, use_container_width=True)
 
-        df_model = pd.DataFrame(model_usage_history,columns=["日期", "模型名称", "已用额度(Model)"])
-        # 将数据透视为日期为索引，模型名称为列，已用额度为值
-        df_model_pivot = df_model.pivot(index="日期", columns="模型名称", values="已用额度(Model)")
-        df_model_pivot = df_model_pivot.sort_index()  # 按日期排序
-        df_model_pivod = df_model_pivot.fillna(0)  # 填充缺失日期为 0
-        st.line_chart(df_model_pivot, use_container_width=True)
-    else:
-        st.write("暂无模型消耗历史数据。")
+        # 2. 绘制表格
+        html_table = df.to_html(index=False, classes='custom-table', border=0)
+        css = """
+        <style>
+        .custom-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        .custom-table th { background-color: #f8f9fa; color: #333; font-weight: bold; padding: 10px; text-align: center !important; border-bottom: 2px solid #ddd; border-top: 1px solid #ddd; }
+        .custom-table td { padding: 10px; text-align: center !important; border-bottom: 1px solid #ddd; }
+        .custom-table tr:hover { background-color: #f5f5f5; }
+        </style>
+        """
+        st.markdown(css, unsafe_allow_html=True)
+        st.markdown(html_table, unsafe_allow_html=True)
 
-# 模型消耗明细展示
-st.subheader("各模型 AI Credits 消耗汇总")
-
-if not models:
-    st.write("当前月份暂无消耗记录。")
-else:
-    # 将数据转换为适合展示的表格
-    table_data = []
-    for model_name, stats in models.items():
-        table_data.append({
-            "模型名称": model_name,
-            "消耗数量 (Gross)": round(stats["gross_quantity"], 2),
-            "消耗占比": f"{stats['percentage']:.2f}%",
-            "产生费用 ($)": round(stats["gross_amount"], 4)
+        # 3. 绘制环形图 (美化：调整尺寸和图例位置)
+        st.markdown("**各模型 AI Credits 消耗占比**")
+        pie_chart_data = pd.DataFrame({
+            "模型名称": [item["模型名称"] for item in table_data],
+            "消耗占比": [float(item["消耗占比"].strip('%')) for item in table_data]
         })
-    
-    # 按消耗量降序排列
-    table_data = sorted(table_data, key=lambda x: x["消耗数量 (Gross)"], reverse=True)
-    
-    # 展示表格
-    df = pd.DataFrame(table_data)
-
-    # 使用 Pandas 将 DataFrame 转换为 HTML 字符串 (不要索引)
-    html_table = df.to_html(index=False, classes='custom-table', border=0)
-
-    # 编写 CSS 样式，强制居中，并美化边框和表头
-    css = """
-    <style>
-    .custom-table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 10px;
-    }
-    .custom-table th {
-        background-color: #f8f9fa; /* 表头浅灰背景 */
-        color: #333;
-        font-weight: bold;
-        padding: 10px;
-        text-align: center !important; /* 表头居中 */
-        border-bottom: 2px solid #ddd;
-        border-top: 1px solid #ddd;
-    }
-    .custom-table td {
-        padding: 10px;
-        text-align: center !important; /* 数据行强制居中 */
-        border-bottom: 1px solid #ddd;
-    }
-    .custom-table tr:hover {
-        background-color: #f5f5f5; /* 鼠标悬停变色 */
-    }
-    </style>
-    """
-
-    # 在 Streamlit 中渲染 CSS 和 HTML
-    st.markdown(css, unsafe_allow_html=True)
-    st.markdown(html_table, unsafe_allow_html=True)
-
-    # 可选：画一个柱状图
-    
-    df = pd.DataFrame(table_data)
-    st.bar_chart(data=df, x="模型名称", y="消耗数量 (Gross)", color="#4B8BBE")
-
-    # 画一个饼图展示占比
-    st.subheader("各模型 AI Credits消耗占比")
-    pie_chart_data = pd.DataFrame({
-        "模型名称": [item["模型名称"] for item in table_data],
-        "消耗占比": [float(item["消耗占比"].strip('%')) for item in table_data]
-    })
-
-    fig = px.pie(
-    pie_chart_data, 
-    values='消耗占比', 
-    names='模型名称', 
-    hole=0.4,  # 👈 设置中间的空心大小，0 是纯饼图，0.4 是环形图（甜甜圈图），看起来更现代
-    color_discrete_sequence=px.colors.qualitative.Pastel # 👈 使用柔和一点的配色
-    )
-
-    # 更新文字显示格式，让百分比显示在饼图外侧
-    fig.update_traces(textposition='outside', textinfo='percent+label')
-
-    # 去掉背景白边，让图表更贴合页面
-    fig.update_layout(margin=dict(t=20, b=20, l=20, r=20), showlegend=True)
-
-    # 在 Streamlit 中渲染
-    st.plotly_chart(fig, use_container_width=True)
+        fig_pie = px.pie(
+            pie_chart_data, values='消耗占比', names='模型名称', hole=0.6,
+            color_discrete_sequence=px.colors.qualitative.Pastel
+        )
+        fig_pie.update_traces(textinfo='percent', textposition='inside', hoverinfo='label+value')
+        fig_pie.update_layout(
+            margin=dict(t=20, b=20, l=20, r=20), height=320, showlegend=True,
+            legend=dict(orientation="h", yanchor="bottom", y=-0.2, xanchor="center", x=0.5)
+        )
+        st.plotly_chart(fig_pie, use_container_width=True)
 
     # streamlit run backend/app.py
