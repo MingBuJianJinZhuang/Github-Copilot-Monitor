@@ -55,14 +55,15 @@ def render_login_page():
     remembered_username = st.query_params.get("remembered_username", "")
     remember_username = bool(remembered_username)
 
+    remember_username = st.checkbox(
+        "记住用户名",
+        value=remember_username,
+        help="只保存用户名，不会保存 Personal Access Token。",
+    )
+
     with st.form("login_form"):
         username = st.text_input("GitHub 用户名", value=remembered_username)
         token = st.text_input("Personal Access Token", type="password", placeholder="ghp_...")
-        remember_username = st.checkbox(
-            "记住用户名",
-            value=remember_username,
-            help="只保存用户名，不会保存 Personal Access Token。",
-        )
         submitted = st.form_submit_button("登录", use_container_width=True)
 
         if submitted:
