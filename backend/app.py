@@ -152,6 +152,7 @@ with st.spinner("正在获取最新数据..."):
 
         # 伪造一个基本的 quota_info 字典，确保后续代码可以正常运行
         quota_info = {
+            "access_type_sku": "未知",
             "included_credits": included_credits,
             "remaining_credits": remaining_credits,
             "used_credits": used_credits,
@@ -186,13 +187,18 @@ else:
     st.success(f"✅ **数据已实时更新** (更新时间: {update_time_str})")
 
 # 顶部关键指标展示（使用列布局）
-col1, col2 = st.columns(2)
+col1, col2, col3 = st.columns(3)
 with col1:
     st.metric(
         label="当前订阅计划", 
         value=quota_info['plan'].upper()
     )
 with col2:
+    st.metric(
+        label="访问类型 SKU",
+        value=quota_info['access_type_sku']
+    )
+with col3:
     st.metric(
         label="剩余额度/总额度", 
         value=f"{quota_info['remaining_credits']}/{quota_info['included_credits']}"

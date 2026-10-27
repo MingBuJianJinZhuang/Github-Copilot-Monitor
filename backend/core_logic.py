@@ -8,6 +8,7 @@ logger = logging.getLogger(__name__)
 def calculate_quota_status(api_data: dict):
     """解析配额快照，计算剩余时间等信息"""
     quota_snapshots = api_data.get("quota_snapshots")
+    access_type_sku = api_data.get("access_type_sku") # 获取访问类型 SKU
     if not isinstance(quota_snapshots, dict):
         raise ValueError("copilot_internal/user 响应中缺少有效的 quota_snapshots")
 
@@ -40,6 +41,7 @@ def calculate_quota_status(api_data: dict):
 
     return {
         "plan": api_data.get('copilot_plan') or api_data.get('access_type_sku', '未知'),
+        "access_type_sku": access_type_sku or "未知",
         "all_quotas": quota_snapshots,
         "included_credits": included_credits,
         "remaining_credits": remaining_credits,
@@ -114,6 +116,7 @@ def build_desktop_payload(quota_info: dict, models: dict, total_gross: float) ->
         "schema_version": 1,
         "quota": {
             "plan": quota_info["plan"],
+            "access_type_sku": quota_info["access_type_sku"],
             "all_quotas": quota_info["all_quotas"],
             "included_credits": included,
             "remaining_credits": remaining,
