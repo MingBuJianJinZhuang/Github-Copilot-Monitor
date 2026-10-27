@@ -108,11 +108,16 @@ if do_backfill:
     )
     if existing_history:
         first_record_date = existing_history[0][0]
-        st.warning(
-            f"⚠️ 当前用户本月已有历史数据（最早记录：{first_record_date}），"
-            "为避免覆盖现有数据，本次未执行回填。"
-        )
+        if not st.session_state.get("backfill_warning_closed", False):
+            st.warning(
+                f"⚠️ 当前用户本月已有历史数据（最早记录：{first_record_date}），"
+                "为避免覆盖现有数据，本次未执行回填。"
+            )
+            if st.button("关闭提醒", key="close_backfill_warning"):
+                st.session_state["backfill_warning_closed"] = True
+                st.rerun()
     else:
+        st.session_state["backfill_warning_closed"] = False
         with st.spinner("正在回填历史数据，大约需要 30 秒..."):
             backfill_data = fetch_daily_usage_backfill(
                 current_user, now.year, now.month, current_token
