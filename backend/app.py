@@ -335,7 +335,13 @@ else:
     df = pd.DataFrame(table_data)
 
     pie_chart_data = pd.DataFrame({
-        "模型名称": [item["模型名称"] for item in table_data],
+        "模型名称": [
+            item["模型名称"]
+            if len(item["模型名称"]) <= 32
+            else f"{item['模型名称'][:29]}..."
+            for item in table_data
+        ],
+        "完整模型名称": [item["模型名称"] for item in table_data],
         "消耗占比": [float(item["消耗占比"].strip('%')) for item in table_data]
     })
 
@@ -406,9 +412,10 @@ with tab2:
         html_table = df.to_html(index=False, classes='custom-table', border=0)
         css = """
         <style>
-        .custom-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        .custom-table { width: 100%; max-width: 100%; table-layout: fixed; border-collapse: collapse; margin-top: 10px; }
         .custom-table th { background-color: #f8f9fa; color: #333; font-weight: bold; padding: 10px; text-align: center !important; border-bottom: 2px solid #ddd; border-top: 1px solid #ddd; }
         .custom-table td { padding: 10px; text-align: center !important; border-bottom: 1px solid #ddd; }
+        .custom-table th:first-child, .custom-table td:first-child { width: 40%; max-width: 40%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .custom-table tr:hover { background-color: #f5f5f5; }
         </style>
         """
@@ -428,6 +435,10 @@ with tab3:
             fig_pie = px.pie(
                 pie_chart_data, values='消耗占比', names='模型名称', hole=0.6,
                 color_discrete_sequence=px.colors.qualitative.Pastel
+            )
+            fig_pie.update_traces(
+                customdata=pie_chart_data[["完整模型名称"]],
+                hovertemplate="%{customdata[0]}<br>消耗占比：%{value:.2f}%<extra></extra>",
             )
             fig_pie.update_traces(textinfo='percent', textposition='inside', hoverinfo='label+value')
             fig_pie.update_layout(

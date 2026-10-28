@@ -107,7 +107,7 @@ def get_copilot_data(force_refresh=False,username:str="",token:str=""):
         logger.info(f"数据刷新：正在从 GitHub 获取最新数据")
         return fetch_api_data(username, token)
     else:
-        logger.info("数据刷新：获取失败，使用本地缓存数据")
+        logger.info("数据刷新：命中本地缓存（15 分钟内）")
         return cached_data
 
 
@@ -177,6 +177,5 @@ def fetch_daily_usage_backfill(username: str, year: int, month: int, token: str)
 
     return daily_results
                     
-
 
 
