@@ -92,6 +92,12 @@ h2, h3 {
     }
     h2 { font-size: 1.1rem !important; }
     h3 { font-size: 1rem !important; }
+
+    /* 趋势图在手机上纵向排列，避免两个图表被压缩。 */
+    [data-testid="stTabs"] [data-testid="stHorizontalBlock"] {
+        flex-direction: column !important;
+        gap: 1rem !important;
+    }
 }
 
 /* 确保所有图表和表格占满容器宽度，不溢出 */
@@ -374,7 +380,7 @@ with tab1:
                 xaxis=dict(
                     type="date",
                     tickformat="%m-%d",
-                    dtick="D1",
+                    dtick="D2",
                     tickangle=-45,
                     showgrid=False,
                 ),
@@ -423,7 +429,17 @@ with tab2:
         .custom-table th { background-color: #f8f9fa; color: #333; font-weight: bold; padding: 10px; text-align: center !important; border-bottom: 2px solid #ddd; border-top: 1px solid #ddd; }
         .custom-table td { padding: 10px; text-align: center !important; border-bottom: 1px solid #ddd; }
         .custom-table th:first-child, .custom-table td:first-child { width: 40%; max-width: 40%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .custom-table tr:hover { background-color: #f5f5f5; }
+        .custom-table tr:hover,
+        .custom-table tr:active,
+        .custom-table tr:focus-within {
+            background-color: #173b63 !important;
+        }
+        .custom-table tr:hover td,
+        .custom-table tr:active td,
+        .custom-table tr:focus-within td {
+            color: inherit !important;
+        }
+        .custom-table ::selection { background-color: #173b63; color: inherit; }
         </style>
         """
         st.markdown(css, unsafe_allow_html=True)
@@ -434,24 +450,30 @@ with tab3:
     if not models:
         st.info("当前月份暂无消耗记录。")
     else:
-        # 为了让图表不至于太宽，可以放在一个居中的列里
         st.markdown("**各模型消耗占比**")
-        col_pie_left, col_pie_center, col_pie_right = st.columns([1, 2, 1])
-        
-        with col_pie_center:
-            fig_pie = px.pie(
-                pie_chart_data, values='消耗占比', names='模型名称', hole=0.6,
-                color_discrete_sequence=px.colors.qualitative.Pastel
-            )
-            fig_pie.update_traces(
-                customdata=pie_chart_data[["完整模型名称"]],
-                hovertemplate="%{customdata[0]}<br>消耗占比：%{value:.2f}%<extra></extra>",
-            )
-            fig_pie.update_traces(textinfo='percent', textposition='inside', hoverinfo='label+value')
-            fig_pie.update_layout(
-                margin=dict(t=20, b=20, l=20, r=20), height=400, showlegend=True,
-                legend=dict(orientation="h", yanchor="bottom", y=-0.2, xanchor="center", x=0.5)
-            )
-            st.plotly_chart(fig_pie, width="stretch")
+        fig_pie = px.pie(
+            pie_chart_data, values='消耗占比', names='模型名称', hole=0.6,
+            color_discrete_sequence=px.colors.qualitative.Pastel
+        )
+        fig_pie.update_traces(
+            customdata=pie_chart_data[["完整模型名称"]],
+            hovertemplate="%{customdata[0]}<br>消耗占比：%{value:.2f}%<extra></extra>",
+            textinfo='percent',
+            textposition='inside',
+            hoverinfo='label+value',
+        )
+        fig_pie.update_layout(
+            margin=dict(t=20, b=120, l=20, r=20),
+            height=500,
+            showlegend=True,
+            legend=dict(
+                orientation="h",
+                yanchor="top",
+                y=-0.18,
+                xanchor="center",
+                x=0.5,
+            ),
+        )
+        st.plotly_chart(fig_pie, width="stretch")
 
     # streamlit run backend/app.py
