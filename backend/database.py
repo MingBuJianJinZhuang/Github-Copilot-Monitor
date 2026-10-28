@@ -85,6 +85,13 @@ def save_daily_usage(
     username: str,
 ):
     """保存当前用户当天的额度和模型用量快照。"""
+    if included_credits <= 0:
+        logger.warning(
+            "当前额度为 %.2f，跳过保存，避免覆盖已有有效数据。",
+            included_credits,
+        )
+        return
+
     today_str = date.today().isoformat()
     client = _get_supabase_client()
 

@@ -1,6 +1,5 @@
 from datetime import datetime
 import logging
-import time
 import streamlit as st
 import pandas as pd
 import plotly.express as px
@@ -105,44 +104,94 @@ h2, h3 {
 """, unsafe_allow_html=True)
 st.title("🤖 GitHub Copilot 额度监控")
 
+# ================= 历史查询缓存 =================
+# Streamlit 每次交互都会 rerun 整个脚本；这里把“按月历史查询”缓存 5 分钟，
+# 避免每次点击控件都重新打 Supabase。回填/落库成功后会显式 clear。
+HISTORY_CACHE_TTL = 300
+
+
+@st.cache_data(ttl=HISTORY_CACHE_TTL, show_spinner=False)
+def load_total_usage_history(year: int, month: int, username: str):
+    return database.get_total_usage_history(year, month, username)
+
+
+@st.cache_data(ttl=HISTORY_CACHE_TTL, show_spinner=False)
+def load_model_usage_history(year: int, month: int, username: str):
+    return database.get_model_usage_history(year, month, username)
+
+
+def clear_history_cache():
+    """历史数据写入后（落库/回填）清掉缓存，让图表读到最新数据。"""
+    load_total_usage_history.clear()
+    load_model_usage_history.clear()
+
+
 # ================= 操作按钮区 =================
 # 在获取数据之前
 col1, col_refresh , col_backfill= st.columns([6, 2, 2])
 with col_refresh:
     force_refresh = st.button("🔄 刷新数据", use_container_width=True)
 
-# 回填历史数据按钮
+# 回填历史数据按钮：只记录“意图”，具体执行放到下方独立流程
 with col_backfill:
     do_backfill = st.button("📥 回填本月历史数据", use_container_width=True)
 
+# ================= 回填历史数据（独立流程） =================
+# 通过 session_state 传递回填结果，回填完成后统一 rerun 一次，
+# 避免与下方“正在获取最新数据”的 spinner 交叉，也不再 sleep 硬等。
+backfill_result_key = "backfill_result"
+
+# 1) 展示上一次回填的结果，展示后立即清空，避免重复弹出
+if backfill_result_key in st.session_state:
+    result = st.session_state.pop(backfill_result_key)
+    if result["status"] == "success":
+        st.success(result["message"])
+    elif result["status"] == "skipped":
+        st.toast(result["message"], icon="⚠️")
+    else:
+        st.warning(result["message"])
+
+# 2) 用户点击回填，执行回填
 if do_backfill:
     now = datetime.now()
-    existing_history = database.get_total_usage_history(
-        now.year, now.month, current_user
-    )
+    # 走缓存，避免每次点击都查库
+    existing_history = load_total_usage_history(now.year, now.month, current_user)
     if existing_history:
         first_record_date = existing_history[0][0]
-        if not st.session_state.get("backfill_warning_closed", False):
-            st.warning(
-                f"⚠️ 当前用户本月已有历史数据（最早记录：{first_record_date}），"
+        st.session_state[backfill_result_key] = {
+            "status": "skipped",
+            "message": (
+                f"当前用户本月已有历史数据（最早记录：{first_record_date}），"
                 "为避免覆盖现有数据，本次未执行回填。"
-            )
-            if st.button("关闭提醒", key="close_backfill_warning"):
-                st.session_state["backfill_warning_closed"] = True
-                st.rerun()
+            ),
+        }
     else:
-        st.session_state["backfill_warning_closed"] = False
         with st.spinner("正在回填历史数据，大约需要 30 秒..."):
-            backfill_data = fetch_daily_usage_backfill(
-                current_user, now.year, now.month, current_token
-            )
-            if backfill_data:
-                database.backfill_history(backfill_data, current_user)
-                st.success(f"✅ 成功回填 {len(backfill_data)} 天的历史数据！")
-                time.sleep(1.5)
-                st.rerun()
-            else:
-                st.warning("暂无数据或回填失败。")
+            try:
+                backfill_data = fetch_daily_usage_backfill(
+                    current_user, now.year, now.month, current_token
+                )
+                if backfill_data:
+                    database.backfill_history(backfill_data, current_user)
+                    # 回填后清缓存，确保 rerun 时图表读到新数据
+                    clear_history_cache()
+                    st.session_state[backfill_result_key] = {
+                        "status": "success",
+                        "message": f"✅ 成功回填 {len(backfill_data)} 天的历史数据！",
+                    }
+                else:
+                    st.session_state[backfill_result_key] = {
+                        "status": "empty",
+                        "message": "暂无数据或回填失败。",
+                    }
+            except Exception:
+                logger.exception("回填历史数据失败。")
+                st.session_state[backfill_result_key] = {
+                    "status": "empty",
+                    "message": "回填历史数据时发生错误，请稍后重试。",
+                }
+    # 回填结束，统一 rerun：让结果提示与刷新后的图表在同一次干净渲染中出现
+    st.rerun()
 
 # ================= 数据获取 =================
 # 获取数据；手动刷新时明确绕过 15 分钟缓存。
@@ -153,16 +202,7 @@ with st.spinner("正在获取最新数据..."):
         models, total_gross = aggregate_model_usage(usage_data)
         desktop_payload = build_desktop_payload(quota_info, models, total_gross)
         current_models_usage = {model: stats["gross_quantity"] for model, stats in models.items()}
-        # 将当前数据保存到数据库中
-        database.save_daily_usage(
-            included_credits=quota_info['included_credits'],
-            used_credits=quota_info['included_credits'] - quota_info['remaining_credits'],
-            remaining_credits=quota_info['remaining_credits'],
-            model_usage=current_models_usage,
-            username=current_user,
-        )
         update_time_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        logger.info("页面数据刷新流程全部成功完成。")
     except Exception as e:
         logger.exception("页面渲染时发生严重错误，已降级为离线模式。")
         data_source = "offline"
@@ -207,9 +247,32 @@ with st.spinner("正在获取最新数据..."):
         desktop_payload = {
             "status": "offline", 
             "message": "数据来源于历史缓存", 
-            "quota": quota_info, 
+                        "quota": quota_info,
             "models": models
         }
+    else:
+        # 防重复落库：Streamlit 每次交互都会 rerun，这里用 session_state 记录
+        # “本次快照是否已经写过”，同一天内相同数据的重复渲染不再重复打 Supabase。
+        snapshot_key = f"snapshot_saved_{current_user}"
+        snapshot_id = f"{update_time_str}|{quota_info['included_credits']}"
+        if st.session_state.get(snapshot_key) == snapshot_id:
+            logger.info("同一份数据快照本会话已保存过，跳过重复写入。")
+        else:
+            try:
+                database.save_daily_usage(
+                    included_credits=quota_info['included_credits'],
+                    used_credits=quota_info['included_credits'] - quota_info['remaining_credits'],
+                    remaining_credits=quota_info['remaining_credits'],
+                    model_usage=current_models_usage,
+                    username=current_user,
+                )
+                st.session_state[snapshot_key] = snapshot_id
+                # 新快照写入后，历史缓存已过期，清掉以让趋势图读到今天的数据
+                clear_history_cache()
+                logger.info("实时数据已成功保存到数据库。")
+            except Exception as e:
+                logger.exception("实时数据已获取，但保存到数据库失败。")
+                st.toast(f"实时数据已获取，但数据库保存失败：{e}", icon="⚠️")
 
 # ================= 顶部状态与指标提示 =================
 if data_source == "offline":
@@ -286,8 +349,7 @@ with tab1:
     col_total, col_model = st.columns(2)
     
     with col_total:
-        st.markdown("**整体已消耗额度趋势**")
-        total_usage_history = database.get_total_usage_history(now.year, now.month, current_user)
+        total_usage_history = load_total_usage_history(now.year, now.month, current_user)
         if total_usage_history:
             df_total = pd.DataFrame(total_usage_history, columns=["日期", "已用额度(Total)"])
             
@@ -312,7 +374,7 @@ with tab1:
 
     with col_model:
         st.markdown("**各模型消耗趋势**")
-        model_usage_history = database.get_model_usage_history(now.year, now.month, current_user)
+        model_usage_history = load_model_usage_history(now.year, now.month, current_user)
         if model_usage_history:
             df_model = pd.DataFrame(model_usage_history, columns=["日期", "模型名称", "已用额度(Model)"])
             df_model_pivot = df_model.pivot(index="日期", columns="模型名称", values="已用额度(Model)").fillna(0).sort_index()
