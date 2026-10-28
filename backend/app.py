@@ -130,11 +130,11 @@ def clear_history_cache():
 # 在获取数据之前
 col1, col_refresh , col_backfill= st.columns([6, 2, 2])
 with col_refresh:
-    force_refresh = st.button("🔄 刷新数据", use_container_width=True)
+    force_refresh = st.button("🔄 刷新数据", width="stretch")
 
 # 回填历史数据按钮：只记录“意图”，具体执行放到下方独立流程
 with col_backfill:
-    do_backfill = st.button("📥 回填本月历史数据", use_container_width=True)
+    do_backfill = st.button("📥 回填本月历史数据", width="stretch")
 
 # ================= 回填历史数据（独立流程） =================
 # 通过 session_state 传递回填结果，回填完成后统一 rerun 一次，
@@ -358,6 +358,7 @@ with tab1:
         total_usage_history = load_total_usage_history(now.year, now.month, current_user)
         if total_usage_history:
             df_total = pd.DataFrame(total_usage_history, columns=["日期", "已用额度(Total)"])
+            df_total["日期"] = pd.to_datetime(df_total["日期"])
             
             # 使用 Plotly 平滑面积图
             fig_total = go.Figure()
@@ -370,11 +371,17 @@ with tab1:
             ))
             fig_total.update_layout(
                 margin=dict(l=10, r=10, t=10, b=10), height=350,
-                xaxis=dict(tickangle=-45, showgrid=False),
+                xaxis=dict(
+                    type="date",
+                    tickformat="%m-%d",
+                    dtick="D1",
+                    tickangle=-45,
+                    showgrid=False,
+                ),
                 yaxis=dict(showgrid=True, gridcolor='#f0f2f6'),
                 plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)'
             )
-            st.plotly_chart(fig_total, use_container_width=True)
+            st.plotly_chart(fig_total, width="stretch")
         else:
             logger.info("当前月份暂无整体消耗历史数据，跳过整体趋势图渲染。")
 
@@ -384,7 +391,7 @@ with tab1:
         if model_usage_history:
             df_model = pd.DataFrame(model_usage_history, columns=["日期", "模型名称", "已用额度(Model)"])
             df_model_pivot = df_model.pivot(index="日期", columns="模型名称", values="已用额度(Model)").fillna(0).sort_index()
-            st.line_chart(df_model_pivot, use_container_width=True)
+            st.line_chart(df_model_pivot, width="stretch")
         else:
             logger.info("当前月份暂无模型消耗历史数据，跳过模型趋势图渲染。")
 
@@ -406,7 +413,7 @@ with tab2:
             xaxis=dict(showgrid=True, gridcolor='#f0f2f6'), yaxis=dict(title="")
         )
         fig_bar.update_traces(texttemplate='%{text:.2f}', textposition='outside')
-        st.plotly_chart(fig_bar, use_container_width=True)
+        st.plotly_chart(fig_bar, width="stretch")
 
         # 渲染表格
         html_table = df.to_html(index=False, classes='custom-table', border=0)
@@ -445,6 +452,6 @@ with tab3:
                 margin=dict(t=20, b=20, l=20, r=20), height=400, showlegend=True,
                 legend=dict(orientation="h", yanchor="bottom", y=-0.2, xanchor="center", x=0.5)
             )
-            st.plotly_chart(fig_pie, use_container_width=True)
+            st.plotly_chart(fig_pie, width="stretch")
 
     # streamlit run backend/app.py

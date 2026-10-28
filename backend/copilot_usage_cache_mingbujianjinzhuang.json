@@ -1,5 +1,5 @@
 {
-  "cached_at": "2026-10-28T02:55:46.559410+00:00",
+  "cached_at": "2026-10-28T08:15:32.576817+00:00",
   "data": {
     "id": 172981220,
     "login": "MingBuJianJinZhuang",
@@ -40,7 +40,7 @@
         "quota_id": "chat",
         "quota_remaining": 0.0,
         "unlimited": true,
-        "timestamp_utc": "2026-10-28T02:55:45.656Z",
+        "timestamp_utc": "2026-10-28T08:15:31.369Z",
         "has_quota": true,
         "quota_reset_at": 0,
         "token_based_billing": true,
@@ -56,7 +56,7 @@
         "quota_id": "completions",
         "quota_remaining": 0.0,
         "unlimited": true,
-        "timestamp_utc": "2026-10-28T02:55:45.656Z",
+        "timestamp_utc": "2026-10-28T08:15:31.369Z",
         "has_quota": true,
         "quota_reset_at": 0,
         "token_based_billing": true,
@@ -68,17 +68,17 @@
       "premium_interactions": {
         "overage_count": 0,
         "overage_permitted": false,
-        "percent_remaining": 56.2,
+        "percent_remaining": 54.2,
         "quota_id": "premium_interactions",
-        "quota_remaining": 112.4,
+        "quota_remaining": 108.4,
         "unlimited": false,
-        "timestamp_utc": "2026-10-28T02:55:45.656Z",
+        "timestamp_utc": "2026-10-28T08:15:31.369Z",
         "has_quota": true,
         "quota_reset_at": 0,
         "token_based_billing": true,
-        "credits_used": 87,
+        "credits_used": 91,
         "overage_entitlement": 0,
-        "remaining": 112,
+        "remaining": 108,
         "entitlement": 200
       }
     },
@@ -100,8 +100,8 @@
         "pricePerUnit": 0.01,
         "grossQuantity": 77.6837709,
         "grossAmount": 0.776837709,
-        "discountQuantity": 77.6837709,
-        "discountAmount": 0.776837709,
+        "discountQuantity": 81.7111206,
+        "discountAmount": 0.817111206,
         "netQuantity": 0.0,
         "netAmount": 0.0
       },
