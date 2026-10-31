@@ -59,6 +59,9 @@ def render_login_page():
         [data-testid="stWidgetLabel"] > div {
             width: fit-content !important;
         }
+        [data-testid="stWidgetLabel"] [data-testid="stTooltipIcon"] {
+            margin-left: 0.35rem;
+        }
         </style>
         """,
         unsafe_allow_html=True,
