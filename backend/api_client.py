@@ -57,8 +57,6 @@ def fetch_api_data(username: str, token: str):
             timeout=30,
         )
         if not response.ok:
-            # ⚠️ 注意：这里只记录状态码和官方报错文本，绝不记录 HEADERS
-            logger.error(f"Copilot 配额接口请求失败 (HTTP {response.status_code}): {response.text[:200]}")
             response.raise_for_status()
         data = response.json()
 
@@ -72,7 +70,6 @@ def fetch_api_data(username: str, token: str):
             timeout=30,
         )
         if not usage_response.ok:
-            logger.error(f"AI Credits 使用接口请求失败 (HTTP {usage_response.status_code}): {usage_response.text[:200]}")
             usage_response.raise_for_status()
         usage_data = usage_response.json()
 
@@ -91,11 +88,11 @@ def fetch_api_data(username: str, token: str):
 
         logger.info("数据拉取成功，并已更新本地 JSON 缓存")
         return data, usage_data
-    except requests.exceptions.RequestException as e:
-        logger.error(f"网络请求异常: {e}")
+    except requests.exceptions.RequestException:
+        logger.exception("GitHub API 网络请求异常")
         raise
-    except Exception as e:
-        logger.error(f"处理 API 数据时发生异常: {e}")
+    except Exception:
+        logger.exception("处理 GitHub API 数据时发生异常")
         raise
 
 
@@ -107,7 +104,7 @@ def get_copilot_data(force_refresh=False,username:str="",token:str=""):
         logger.info(f"数据刷新：正在从 GitHub 获取最新数据")
         return fetch_api_data(username, token)
     else:
-        logger.info("数据刷新：获取失败，使用本地缓存数据")
+        logger.info("数据刷新：使用本地缓存数据")
         return cached_data
 
 
@@ -177,6 +174,4 @@ def fetch_daily_usage_backfill(username: str, year: int, month: int, token: str)
 
     return daily_results
                     
-
-
 

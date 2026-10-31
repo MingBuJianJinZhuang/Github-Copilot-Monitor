@@ -1,5 +1,7 @@
 import json
 import sys
+
+from logger_setup import setup_logger
 from api_client import get_copilot_data
 from core_logic import (
     aggregate_model_usage,
@@ -9,6 +11,9 @@ from core_logic import (
 
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8")
+
+setup_logger()
+
 
 def main():
     # 1. 获取原始数据

@@ -32,8 +32,10 @@ def verify_github_credentials(username: str, token: str) -> bool:
             return False, f"❌ GitHub API 返回未知状态码: {resp.status_code}"
         
     except requests.exceptions.Timeout:
+        logger.exception("GitHub 凭证验证超时")
         return False, "⏳ 连接 GitHub 超时，请检查网络后重试。"
     except Exception as e:
+        logger.exception("GitHub 凭证验证发生异常")
         return False, f"❌ 验证过程中发生异常: {e}"
 
     
