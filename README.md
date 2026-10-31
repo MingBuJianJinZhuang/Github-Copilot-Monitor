@@ -2,12 +2,20 @@
 
 一个基于 Streamlit 的 GitHub Copilot 额度和 AI Credits 使用情况监控面板，支持：
 
-- 查看当前 Copilot 订阅计划、账户类型、剩余额度和重置时间
+- 查看当前 Copilot 订阅计划、账户类型、剩余额度和重置时间（免费版暂时不兼容）
 - 按模型查看 AI Credits 使用量
 - 保存每日额度与模型用量历史
 - 查看本月趋势图和模型明细
 - 网络请求失败时使用本地历史数据离线展示
-- 只回填本月缺失的历史日期，避免重复请求和覆盖已有数据
+- 第一次使用提供回填本月缺失的历史日期功能
+
+## 在线示例
+
+可以直接访问在线示例体验：
+
+[Copilot 额度监控 · Streamlit](https://app-copilot-monitor-adymgqt4yvi8wh6gvawcc5.streamlit.app/)
+
+在线示例使用 Streamlit Cloud 部署。首次访问时需要输入自己的 GitHub 用户名和 Personal Access Token；项目不会提供或代为收集访问者的 Token。在线示例与本地部署使用相同的登录、额度查询和历史数据展示流程，实际可读取的数据取决于当前 GitHub 账户的 Copilot 权限和 Token 权限。
 
 ## 项目结构
 
@@ -30,7 +38,7 @@
 
 - Python 3.11 或更高版本
 - GitHub 账户及 Copilot 使用权限
-- Supabase 项目，用于保存历史数据
+- Supabase 项目，用于持久化历史数据
 
 ## 安装依赖
 
@@ -98,6 +106,17 @@ python -m pip install -r requirements.txt
 
 应用使用 Supabase 保存每日历史数据。创建 Supabase 项目后，在项目的 SQL Editor 中创建以下两张表：
 
+创建 Supabase 时请注意：
+
+- 选择与使用者所在区域和部署环境相适合的项目区域；项目创建后通常不能直接更换区域。
+- 保存好项目 URL 和密钥。项目 URL 可以用于连接配置，但密钥必须保密。
+- 生产环境建议使用服务端密钥，并只通过 Streamlit Secrets 配置；不要把密钥写入 Python 文件、README、截图或提交记录。
+- `SUPABASE_SERVICE_ROLE_KEY` 具有较高权限，会绕过部分 RLS（Row Level Security）策略。必须避免泄露，不能放在前端代码、浏览器脚本或公开仓库中。
+- 如果改用 anon key，必须根据实际用户隔离需求配置 RLS；否则可能无法写入，或造成不同用户之间的数据访问风险。
+- 下面的表使用 `(record_date, username)` 和 `(record_date, username, model_name)` 作为联合主键，不能省略，否则 `upsert` 无法按预期去重。
+- `record_date` 应使用 `date` 类型，额度字段应使用 `double precision` 或其他能够保存小数的数值类型。
+- 执行 SQL 后，请确认两张表已成功创建，并检查表名、列名和联合主键与下面定义完全一致。
+
 ```sql
 create table if not exists total_daily_usage (
   record_date date not null,
@@ -116,6 +135,8 @@ create table if not exists model_daily_usage (
   primary key (record_date, username, model_name)
 );
 ```
+
+如果启用了 RLS，请根据部署方式配置对应策略。使用服务端密钥时仍应严格保护密钥；不要为了排查问题而把数据库设置为完全公开。
 
 在项目根目录创建 `.streamlit/secrets.toml`。该文件已被 `.gitignore` 忽略，不要提交到 Git：
 

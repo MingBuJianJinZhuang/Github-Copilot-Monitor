@@ -1,0 +1,51 @@
+创建 Fine-grained Token
+
+步骤 1：打开 GitHub Token 设置页面
+
+使用浏览器登录自己的 GitHub 账户，然后打开：
+https://github.com/settings/personal-access-tokens
+
+也可以从 GitHub 头像菜单进入：
+Settings（设置）
+  -> Developer settings（开发者设置）
+  -> Personal access tokens（个人访问令牌）
+  -> Fine-grained tokens（细粒度令牌）
+
+步骤 2：开始创建
+
+点击：Generate new token（生成新令牌）
+
+如果页面要求验证身份，请按 GitHub 提示完成验证。
+
+步骤 3：填写 Token 基本信息
+
+根据页面填写：
+- Token name：例如 Copilot-Quota-Monitor
+- Description：例如 Read Copilot billing usage for personal dashboard
+- Expiration：建议设置合理的有效期。到期后需要重新生成并更新本地配置。
+- Resource owner：选择拥有相关 Copilot 订阅和账单数据的个人账户。
+
+如果项目读取的是个人账户的账单数据，通常应选择自己的个人账户，而不是无关组织。
+
+步骤 4：设置 Repository access
+
+本项目读取的是个人账户的计费/使用数据，不需要为了这个接口而授予仓库内容访问权限。
+如果页面要求选择 Repository access，请根据实际需要选择；不要为了读取账单而额外开放无关仓库权限。
+
+步骤 5：配置 Account permissions
+
+在页面的 Permissions（权限）区域，找到 Account permissions（账户权限）。
+
+根据 GitHub 当前 Billing REST API 文档，读取个人账户 AI Credits 使用报告需要用户级 Plan 权限的 read 访问能力（Plan: Read-only）。
+
+请注意：
+- Plan 是用户/账户级权限，不是 Repository permissions（仓库权限）。
+- 不要把 Plan 和仓库的 Contents、Issues 等权限混淆。
+- 如果 Account permissions 中没有 Plan，不要随意勾选其他高权限项，也不要假设其他权限等价。
+- GitHub 的权限选项可能因令牌类型、账户状态或当前界面而有所不同。遇到缺失时，请查看官方 Billing REST API 的最新权限要求，确认该接口和当前账户是否适用；必要时先用无敏感信息的 HTTP 状态码排查。
+- 只授予项目实际需要的最低权限。
+
+步骤 6：生成 Token
+
+确认配置后，点击 Generate token（生成令牌）。
+GitHub 通常只会在生成时显示完整 Token。请立即复制并妥善保存；离开页面后通常无法再次查看原始值。
