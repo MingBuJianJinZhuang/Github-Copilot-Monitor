@@ -13,6 +13,7 @@ from core_logic import (
     aggregate_model_usage,
     build_desktop_payload,
     calculate_quota_status,
+    empty_quota_info,
 )
 
 # 设置全局日志
@@ -227,16 +228,14 @@ with st.spinner("正在获取最新数据..."):
         update_time_str = f"历史缓存数据 (日期: {record_date})"
         latest_models_date = database.get_latest_model_usage(current_user, record_date)
 
-        # 伪造一个基本的 quota_info 字典，确保后续代码可以正常运行
-        quota_info = {
+        quota_info = empty_quota_info()
+        quota_info.update({
             "account_status": "未知账户类型",
             "included_credits": included_credits,
             "remaining_credits": remaining_credits,
             "used_credits": used_credits,
             "plan": "unknown",
-            "remaining_time_text": "未知",
-            "reset_time_text": "未知"
-        }
+        })
 
         models = {}
         total_gross = sum(m[1] for m in latest_models_date) if latest_models_date else 0
@@ -366,23 +365,39 @@ with tab1:
             df_total = pd.DataFrame(total_usage_history, columns=["日期", "已用额度(Total)"])
             df_total["日期"] = pd.to_datetime(df_total["日期"])
             
-            # 使用 Plotly 平滑面积图
+            # 手动生成每 2 天的日期刻度列表
+            if not df_total.empty:
+                tickvals = pd.date_range(
+                    start=df_total["日期"].min(), 
+                    end=df_total["日期"].max(), 
+                    freq='2D'
+                ).tolist()
+            else:
+                tickvals = []
+
+            # ================= 修改这里：改回折线图 =================
             fig_total = go.Figure()
             fig_total.add_trace(go.Scatter(
                 x=df_total["日期"], y=df_total["已用额度(Total)"],
                 mode='lines+markers',
-                line=dict(color='#4A90E2', width=3, shape='spline'),
-                fill='tozeroy', fillcolor='rgba(74, 144, 226, 0.1)',
+                # 去掉了 shape='spline'，变为直线
+                line=dict(color='#4A90E2', width=3), 
+                # 去掉了 fill='tozeroy' 和 fillcolor，不再填充面积
                 marker=dict(size=6)
             ))
+            # ========================================================
+            
             fig_total.update_layout(
-                margin=dict(l=10, r=10, t=10, b=10), height=350,
+                # 因为日期竖直显示，需要把底部边距 b 调大，防止日期文字被切掉
+                margin=dict(l=10, r=10, t=10, b=80), 
+                height=380,
                 xaxis=dict(
                     type="date",
-                    tickformat="%m-%d",
-                    dtick="D2",
-                    tickangle=-45,
+                    tickformat="%Y-%m-%d",
+                    tickvals=tickvals,
+                    tickangle=-90,
                     showgrid=False,
+                    tickfont=dict(size=11)
                 ),
                 yaxis=dict(showgrid=True, gridcolor='#f0f2f6'),
                 plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)'

@@ -5,6 +5,23 @@ import logging
 # 获取当前模块的 logger
 logger = logging.getLogger(__name__)
 
+
+def empty_quota_info() -> dict:
+    """Return a quota payload with the complete set of expected fields."""
+    now_utc = datetime.now(timezone.utc)
+    return {
+        "plan": "未知",
+        "account_status": "未知账户类型",
+        "all_quotas": {},
+        "included_credits": 0,
+        "remaining_credits": 0,
+        "used_credits": 0,
+        "reset_time_text": "未知",
+        "remaining_time_text": "未知",
+        "current_date_str": now_utc.strftime("%Y 年 %m 月 %d 日"),
+    }
+
+
 def calculate_quota_status(api_data: dict):
     """解析配额快照，计算剩余时间等信息"""
     quota_snapshots = api_data.get("quota_snapshots")
@@ -58,14 +75,16 @@ def calculate_quota_status(api_data: dict):
     account_status = get_account_status_desc(plan, access_type_sku)
 
     return {
+        **empty_quota_info(),
         "plan": plan or "未知",
         "account_status": account_status,
         "all_quotas": quota_snapshots,
         "included_credits": included_credits,
         "remaining_credits": remaining_credits,
+        "used_credits": max(included_credits - remaining_credits, 0),
         "reset_time_text": reset_time_text,
         "remaining_time_text": remaining_time_text,
-        "current_date_str": now_utc.strftime('%Y 年 %m 月 %d 日')
+        "current_date_str": now_utc.strftime("%Y 年 %m 月 %d 日"),
     }
 
 
