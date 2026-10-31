@@ -31,7 +31,7 @@ class DashboardData:
 
 
 class DashboardDataUnavailable(RuntimeError):
-    """Raised when neither the API nor local history can provide dashboard data."""
+    """当无法获取到有效的 dashboard 数据时抛出此异常。"""
 
 
 @st.cache_data(ttl=HISTORY_CACHE_TTL, show_spinner=False)
@@ -45,19 +45,25 @@ def load_model_usage_history(year: int, month: int, username: str):
 
 
 def clear_history_cache() -> None:
-    """Clear cached history after writing or backfilling records."""
+    """清除历史数据缓存，确保下次获取时从数据库重新拉取。"""
     load_total_usage_history.clear()
     load_model_usage_history.clear()
 
 
-def fetch_backfill_data(username: str, year: int, month: int, token: str):
-    return fetch_daily_usage_backfill(username, year, month, token)
+def fetch_backfill_data(
+    username: str,
+    year: int,
+    month: int,
+    token: str,
+    days: list[int],
+):
+    return fetch_daily_usage_backfill(username, year, month, token, days)
 
 
 def load_dashboard_data(
     current_user: str, current_token: str, force_refresh: bool
 ) -> DashboardData:
-    """Fetch live dashboard data, falling back to the latest local snapshot."""
+    """获取实时 dashboard 数据，若失败则尝试使用离线数据。"""
     try:
         api_data, usage_data = get_copilot_data(
             force_refresh=force_refresh,

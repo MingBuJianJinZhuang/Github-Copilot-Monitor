@@ -190,20 +190,42 @@ def get_latest_model_usage(username: str, target_date: str):
     ]
 
 
-def backfill_history(daily_results: dict, username: str):
+def backfill_history(
+    daily_results: dict,
+    username: str,
+    existing_total_history: list[tuple[str, float]] | None = None,
+    existing_model_history: list[tuple[str, str, float]] | None = None,
+):
     """回填当前用户按日累计的历史用量。"""
-    cumulative_total = 0.0
-    cumulative_models: dict[str, float] = {}
+    existing_total_history = existing_total_history or []
+    existing_model_history = existing_model_history or []
+    total_by_date = {
+        record_date: used_credits
+        for record_date, used_credits in existing_total_history
+    }
+    models_by_date: dict[str, dict[str, float]] = {}
+    for record_date, model_name, used_credits in existing_model_history:
+        models_by_date.setdefault(record_date, {})[model_name] = used_credits
+
     client = _get_supabase_client()
 
     try:
         for date_str in sorted(daily_results):
             result = daily_results[date_str]
-            cumulative_total += result["total"]
+            previous_dates = [date for date in total_by_date if date < date_str]
+            previous_date = max(previous_dates) if previous_dates else None
+            cumulative_total = (
+                total_by_date[previous_date] if previous_date else 0.0
+            ) + result["total"]
+            cumulative_models: dict[str, float] = {}
+            if previous_date:
+                cumulative_models.update(models_by_date.get(previous_date, {}))
             for model, quantity in result["models"].items():
                 cumulative_models[model] = (
                     cumulative_models.get(model, 0.0) + quantity
                 )
+            total_by_date[date_str] = cumulative_total
+            models_by_date[date_str] = cumulative_models
 
             client.table("total_daily_usage").upsert(
                 {

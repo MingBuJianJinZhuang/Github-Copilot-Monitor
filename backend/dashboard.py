@@ -111,24 +111,45 @@ def render_dashboard(current_user: str, current_token: str) -> None:
         now = datetime.now()
         # 走缓存，避免每次点击都查库
         existing_history = load_total_usage_history(now.year, now.month, current_user)
-        if existing_history:
-            first_record_date = existing_history[0][0]
+        existing_dates = {record[0] for record in existing_history}
+        missing_days = [
+            day
+            for day in range(1, now.day)
+            if f"{now.year:04d}-{now.month:02d}-{day:02d}" not in existing_dates
+        ]
+        if not missing_days:
             st.session_state[backfill_result_key] = {
                 "status": "skipped",
                 "message": (
-                    f"当前用户本月已有历史数据（最早记录：{first_record_date}），"
-                    "为避免覆盖现有数据，本次未执行回填。"
+                    "本月历史数据完整，没有需要回填的日期。"
                 ),
             }
-            logger.info("回填历史数据被跳过：本月已有历史数据，避免覆盖。")
+            logger.info("回填历史数据被跳过：本月没有缺失日期。")
         else:
             with st.spinner("正在回填历史数据，大约需要 30 秒..."):
                 try:
+                    existing_model_history = load_model_usage_history(
+                        now.year, now.month, current_user
+                    )
                     backfill_data = fetch_backfill_data(
-                        current_user, now.year, now.month, current_token
+                        current_user,
+                        now.year,
+                        now.month,
+                        current_token,
+                        missing_days,
                     )
                     if backfill_data:
-                        database.backfill_history(backfill_data, current_user)
+                        database.backfill_history(
+                            backfill_data,
+                            current_user,
+                            existing_history,
+                            existing_model_history,
+                        )
+                        logger.info(
+                            "历史数据回填完成：请求 %d 天，成功写入 %d 天。",
+                            len(missing_days),
+                            len(backfill_data),
+                        )
                         # 回填后清缓存，确保 rerun 时图表读到新数据
                         clear_history_cache()
                         st.session_state[backfill_result_key] = {
@@ -136,6 +157,10 @@ def render_dashboard(current_user: str, current_token: str) -> None:
                             "message": f"✅ 成功回填 {len(backfill_data)} 天的历史数据！",
                         }
                     else:
+                        logger.warning(
+                            "历史数据回填未返回数据：请求 %d 个缺失日期。",
+                            len(missing_days),
+                        )
                         st.session_state[backfill_result_key] = {
                             "status": "empty",
                             "message": "暂无数据或回填失败。",
@@ -207,7 +232,7 @@ def render_dashboard(current_user: str, current_token: str) -> None:
     col1, col2, col3 = st.columns(3)
     with col1:
         st.metric(
-            label="当前订阅计划",
+            label="订阅计划",
             value=quota_info['plan'].upper()
         )
     with col2:
@@ -372,7 +397,7 @@ def render_dashboard(current_user: str, current_token: str) -> None:
             .custom-table tr:focus-within td {
                 color: inherit !important;
             }
-            .custom-table ::selection { background-color: #173b63; color: inherit; }
+            .custom-table ::selection { background-color: #47B1FF; color: inherit; }
             </style>
             """
             st.markdown(css, unsafe_allow_html=True)

@@ -108,7 +108,13 @@ def get_copilot_data(force_refresh=False,username:str="",token:str=""):
         return cached_data
 
 
-def fetch_daily_usage_backfill(username: str, year: int, month: int, token: str):
+def fetch_daily_usage_backfill(
+    username: str,
+    year: int,
+    month: int,
+    token: str,
+    days: list[int] | None = None,
+):
     """
     回填指定月份的历史数据。
     返回格式 为 { "YYYY-MM-DD": {"total": float, "models": {model_name: float}} }
@@ -135,10 +141,18 @@ def fetch_daily_usage_backfill(username: str, year: int, month: int, token: str)
         logger.error("不能回填未来的数据。")
         return {}
 
-    # 如果今天是当月 1 号，last_day 会是 0，循环自然就不会执行，非常安全
-    logger.info(f"开始回填历史数据，回填范围：{year}-{month:02d}-01 到 {year}-{month:02d}-{last_day:02d}")
+    requested_days = (
+        list(range(1, last_day + 1))
+        if days is None
+        else sorted({day for day in days if 1 <= day <= last_day})
+    )
+    logger.info(
+        "开始回填历史数据：%s 天，范围：%s",
+        len(requested_days),
+        ", ".join(f"{year}-{month:02d}-{day:02d}" for day in requested_days),
+    )
 
-    for day in range(1, last_day + 1):
+    for day in requested_days:
         # 构建请求 URL 和参数
         url = f"https://api.github.com/users/{username}/settings/billing/ai_credit/usage"
         params = {"year": year, "month": month, "day": day}
@@ -174,4 +188,3 @@ def fetch_daily_usage_backfill(username: str, year: int, month: int, token: str)
 
     return daily_results
                     
-
