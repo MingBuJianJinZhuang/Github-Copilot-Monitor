@@ -50,10 +50,25 @@ def is_authenticated() -> bool:
 
 def render_login_page():
     """渲染登录页面，要求用户输入 GitHub 用户名和 Personal Access Token"""
+    st.markdown(
+        """
+        <style>
+        [data-testid="stWidgetLabel"] {
+            width: fit-content !important;
+        }
+        [data-testid="stWidgetLabel"] > div {
+            width: fit-content !important;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
     st.title("👤 Github Copilot 额度监控")
-    st.markdown("请使用您的 **GitHub 用户名** 和 **Personal Access Token** 登录。")
-    st.info("💡 您的 Token 仅保存在当前会话内存中，不会被记录到任何服务器日志中。")
-
+    st.markdown(
+        "📦 [访问 GitHub 项目仓库]"
+        "(https://github.com/MingBuJianJinZhuang/Github-Copilot-Monitor)"
+    )
+    
     remembered_username = st.query_params.get("remembered_username", "")
     remember_username = bool(remembered_username)
 
@@ -65,7 +80,12 @@ def render_login_page():
 
     with st.form("login_form"):
         username = st.text_input("GitHub 用户名", value=remembered_username)
-        token = st.text_input("Personal Access Token", type="password", placeholder="ghp_...")
+        token = st.text_input(
+            "Personal Access Token ",
+            type="password",
+            placeholder="ghp_...",
+            help="您的 Token 仅保存在当前会话内存中，不会被记录到任何服务器日志中。",
+        )
         submitted = st.form_submit_button("登录", use_container_width=True)
 
         if submitted:
