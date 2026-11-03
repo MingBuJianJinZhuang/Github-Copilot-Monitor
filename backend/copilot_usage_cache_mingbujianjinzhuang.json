@@ -1,5 +1,5 @@
 {
-  "cached_at": "2026-10-31T10:26:58.596107+00:00",
+  "cached_at": "2026-11-03T01:29:39.647018+00:00",
   "data": {
     "id": 172981220,
     "login": "MingBuJianJinZhuang",
@@ -31,7 +31,7 @@
     "can_upgrade_plan": true,
     "enterprise_usage_telemetry": false,
     "te": false,
-    "quota_reset_date": "2026-11-01",
+    "quota_reset_date": "2026-12-01",
     "quota_snapshots": {
       "chat": {
         "overage_count": 0,
@@ -40,7 +40,7 @@
         "quota_id": "chat",
         "quota_remaining": 0.0,
         "unlimited": true,
-        "timestamp_utc": "2026-10-31T10:26:57.175Z",
+        "timestamp_utc": "2026-11-03T01:29:40.510Z",
         "has_quota": true,
         "quota_reset_at": 0,
         "token_based_billing": true,
@@ -56,7 +56,7 @@
         "quota_id": "completions",
         "quota_remaining": 0.0,
         "unlimited": true,
-        "timestamp_utc": "2026-10-31T10:26:57.175Z",
+        "timestamp_utc": "2026-11-03T01:29:40.510Z",
         "has_quota": true,
         "quota_reset_at": 0,
         "token_based_billing": true,
@@ -68,92 +68,40 @@
       "premium_interactions": {
         "overage_count": 0,
         "overage_permitted": false,
-        "percent_remaining": 28.8,
+        "percent_remaining": 93.9,
         "quota_id": "premium_interactions",
-        "quota_remaining": 57.6,
+        "quota_remaining": 187.8,
         "unlimited": false,
-        "timestamp_utc": "2026-10-31T10:26:57.175Z",
+        "timestamp_utc": "2026-11-03T01:29:40.510Z",
         "has_quota": true,
         "quota_reset_at": 0,
         "token_based_billing": true,
-        "credits_used": 142,
+        "credits_used": 12,
         "overage_entitlement": 0,
-        "remaining": 57,
+        "remaining": 187,
         "entitlement": 200
       }
     },
-    "quota_reset_date_utc": "2026-11-01T00:00:00.000Z",
+    "quota_reset_date_utc": "2026-12-01T00:00:00.000Z",
     "token_based_billing": true
   },
   "usage_data": {
     "timePeriod": {
       "year": 2026,
-      "month": 10
+      "month": 11
     },
     "user": "MingBuJianJinZhuang",
     "usageItems": [
       {
         "product": "Copilot",
         "sku": "Copilot AI Credits",
-        "model": "Auto: GPT-5.6 Luna",
-        "unitType": "ai-credits",
-        "pricePerUnit": 0.01,
-        "grossQuantity": 88.3038924,
-        "grossAmount": 0.883038924,
-        "discountQuantity": 88.3038924,
-        "discountAmount": 0.883038924,
-        "netQuantity": 0.0,
-        "netAmount": 0.0
-      },
-      {
-        "product": "Copilot",
-        "sku": "Copilot AI Credits",
-        "model": "Auto: MAI-Code-1.1-Flash",
-        "unitType": "ai-credits",
-        "pricePerUnit": 0.01,
-        "grossQuantity": 1.5025824,
-        "grossAmount": 0.015025824,
-        "discountQuantity": 1.5025824,
-        "discountAmount": 0.015025824,
-        "netQuantity": 0.0,
-        "netAmount": 0.0
-      },
-      {
-        "product": "Copilot",
-        "sku": "Copilot AI Credits",
         "model": "Fusion (Standard): GPT-5.6 Luna",
         "unitType": "ai-credits",
         "pricePerUnit": 0.01,
-        "grossQuantity": 37.447122,
-        "grossAmount": 0.37447122,
-        "discountQuantity": 37.986695,
-        "discountAmount": 0.37986695,
-        "netQuantity": 0.0,
-        "netAmount": 0.0
-      },
-      {
-        "product": "Copilot",
-        "sku": "Copilot AI Credits",
-        "model": "GPT-5 mini",
-        "unitType": "ai-credits",
-        "pricePerUnit": 0.01,
-        "grossQuantity": 5.13796,
-        "grossAmount": 0.0513796,
-        "discountQuantity": 5.13796,
-        "discountAmount": 0.0513796,
-        "netQuantity": 0.0,
-        "netAmount": 0.0
-      },
-      {
-        "product": "Copilot",
-        "sku": "Copilot AI Credits",
-        "model": "GPT-5.6 Luna",
-        "unitType": "ai-credits",
-        "pricePerUnit": 0.01,
-        "grossQuantity": 9.419829,
-        "grossAmount": 0.09419829,
-        "discountQuantity": 9.419829,
-        "discountAmount": 0.09419829,
+        "grossQuantity": 12.166353,
+        "grossAmount": 0.12166353,
+        "discountQuantity": 12.166353,
+        "discountAmount": 0.12166353,
         "netQuantity": 0.0,
         "netAmount": 0.0
       }

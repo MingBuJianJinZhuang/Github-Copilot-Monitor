@@ -100,11 +100,11 @@ def render_dashboard(current_user: str, current_token: str) -> None:
     if backfill_result_key in st.session_state:
         result = st.session_state.pop(backfill_result_key)
         if result["status"] == "success":
-            st.success(result["message"])
+            st.toast(result["message"], icon="✅")
         elif result["status"] == "skipped":
             st.toast(result["message"], icon="⚠️")
         else:
-            st.warning(result["message"])
+            st.toast(result["message"], icon="❌")
 
     # 2) 用户点击回填，执行回填
     if do_backfill:
@@ -434,4 +434,3 @@ def render_dashboard(current_user: str, current_token: str) -> None:
             )
             st.plotly_chart(fig_pie, width="stretch")
 
-        # streamlit run backend/app.py

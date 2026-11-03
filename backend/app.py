@@ -34,3 +34,5 @@ with st.sidebar:
 # 初始化数据库并渲染仪表盘
 database.initialize_database(current_user)
 render_dashboard(current_user, current_token)
+
+# streamlit run backend/app.py
