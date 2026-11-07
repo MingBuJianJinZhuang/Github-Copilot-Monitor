@@ -154,7 +154,7 @@ def render_dashboard(current_user: str, current_token: str) -> None:
                         clear_history_cache()
                         st.session_state[backfill_result_key] = {
                             "status": "success",
-                            "message": f"✅ 成功回填 {len(backfill_data)} 天的历史数据！",
+                            "message": f" 成功回填 {len(backfill_data)} 天的历史数据！",
                         }
                     else:
                         logger.warning(

@@ -17,6 +17,7 @@ def setup_logger() -> logging.Logger:
     root_logger = logging.getLogger()
     root_logger.setLevel(logging.INFO)
 
+    # 标记现有的处理程序，以便我们可以识别它们
     for handler in root_logger.handlers:
         if isinstance(handler, logging.FileHandler):
             try:
