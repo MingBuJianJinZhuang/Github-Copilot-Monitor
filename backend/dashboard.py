@@ -379,28 +379,55 @@ def render_dashboard(current_user: str, current_token: str) -> None:
             fig_bar.update_traces(texttemplate='%{text:.2f}', textposition='outside')
             st.plotly_chart(fig_bar, width="stretch")
 
-            # 渲染表格
-            html_table = df.to_html(index=False, classes='custom-table', border=0)
-            css = """
-            <style>
-            .custom-table { width: 100%; max-width: 100%; table-layout: fixed; border-collapse: collapse; margin-top: 10px; }
-            .custom-table th { background-color: #f8f9fa; color: #333; font-weight: bold; padding: 10px; text-align: center !important; border-bottom: 2px solid #ddd; border-top: 1px solid #ddd; }
-            .custom-table td { padding: 10px; text-align: center !important; border-bottom: 1px solid #ddd; }
-            .custom-table th:first-child, .custom-table td:first-child { width: 40%; max-width: 40%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-            .custom-table tr:hover,
-            .custom-table tr:active,
-            .custom-table tr:focus-within {
-                background-color: #173b63 !important;
-            }
-            .custom-table tr:hover td,
-            .custom-table tr:active td,
-            .custom-table tr:focus-within td {
-                color: inherit !important;
-            }
-            .custom-table ::selection { background-color: #47B1FF; color: inherit; }
-            </style>
-            """
-            st.markdown(css, unsafe_allow_html=True)
+            html_table = df.to_html(index=False, classes="custom-table", border=0)
+            html_table = html_table.replace(
+                "<tr>",
+                '<tr tabindex="0">',
+            )
+
+            # 使用 CSS focus 状态实现点击高亮，不触发 Streamlit 重运行。
+            st.markdown(
+                """
+                <style>
+                .custom-table {
+                    width: 100%;
+                    table-layout: fixed;
+                    border-collapse: collapse;
+                    margin-top: 10px;
+                }
+                .custom-table th,
+                .custom-table td {
+                    padding: 10px;
+                    text-align: center !important;
+                    border-bottom: 1px solid #ddd;
+                }
+                .custom-table th {
+                    background-color: #f8f9fa;
+                    color: #333;
+                    font-weight: bold;
+                    border-bottom: 2px solid #ddd;
+                    border-top: 1px solid #ddd;
+                }
+                .custom-table th:first-child,
+                .custom-table td:first-child {
+                    width: 40%;
+                    max-width: 40%;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+                }
+                .custom-table tbody tr {
+                    cursor: pointer;
+                    outline: none;
+                }
+                .custom-table tbody tr:hover,
+                .custom-table tbody tr:focus {
+                    background-color: #D6EAF8 !important;
+                }
+                </style>
+                """,
+                unsafe_allow_html=True,
+            )
             st.markdown(html_table, unsafe_allow_html=True)
 
     # --- Tab 3: 环形图 ---
@@ -433,4 +460,3 @@ def render_dashboard(current_user: str, current_token: str) -> None:
                 ),
             )
             st.plotly_chart(fig_pie, width="stretch")
-
