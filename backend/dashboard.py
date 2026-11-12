@@ -303,6 +303,7 @@ def render_dashboard(current_user: str, current_token: str) -> None:
         col_total, col_model = st.columns(2)
         
         with col_total:
+            st.markdown("**整体消耗趋势**")
             total_usage_history = load_total_usage_history(now.year, now.month, current_user)
             if total_usage_history:
                 df_total = pd.DataFrame(total_usage_history, columns=["日期", "已用额度(Total)"])
